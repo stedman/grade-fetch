@@ -4,9 +4,19 @@ const secrets = require('./secrets');
 
 const scrape = async () => {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
   });
   const page = await browser.newPage();
+
+  // Skip loading un-needed visuals.
+  await page.setRequestInterception(true);
+  page.on('request', (req) => {
+    if (['stylesheet', 'font', 'image'].includes(req.resourceType())) {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
 
   // 1) LOGIN
   await page.goto('https://accesscenter.roundrockisd.org/HomeAccess/Account/LogOn',
@@ -63,7 +73,7 @@ const scrape = async () => {
     const tableRows = document.querySelectorAll('#plnMain_dgAssignmentsByDate tbody .sg-asp-table-data-row');
     const tableData = [];
 
-    // NOTE: Data formatting can be done at a later stage and is only included here as a convenience.
+    // NOTE: Data formatting can be done at a later stage. Included here as a POC.
 
     tableRows
       .forEach((el) => {
