@@ -2,10 +2,37 @@ const fs = require('fs');
 const puppeteer = require('puppeteer');
 const secrets = require('./secrets');
 
+const site = {
+  login: {
+    url: 'https://accesscenter.roundrockisd.org/HomeAccess/Account/LogOn',
+    sel: {
+      username: '#LogOnDetails_UserName',
+      password: '#LogOnDetails_Password',
+      submit: '.sg-logon-button'
+    }
+  },
+  home: {
+    url: 'https://accesscenter.roundrockisd.org/HomeAccess/Home/WeekView',
+    sel: {
+      studentName: '.sg-banner-chooser .sg-banner-text',
+      table: '.sg-homeview-table',
+      tableRows: '.sg-homeview-table tbody tr',
+      courseName: '#courseName',
+      courseAverage: '#average'
+    }
+  },
+  cWork: {
+    url: 'https://accesscenter.roundrockisd.org/HomeAccess/Content/Student/Assignments.aspx',
+    sel: {
+      orderBy: 'select#plnMain_ddlOrderBy',
+      refresh: '#plnMain_btnRefreshView',
+      tableRows: '#plnMain_dgAssignmentsByDate tbody .sg-asp-table-data-row'
+    }
+  }
+};
+
 const scrape = async () => {
-  const browser = await puppeteer.launch({
-    headless: true,
-  });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   // Skip loading un-needed visuals.
@@ -19,117 +46,154 @@ const scrape = async () => {
   });
 
   // 1) LOGIN
-  await page.goto('https://accesscenter.roundrockisd.org/HomeAccess/Account/LogOn',
-    { waitUntil: 'networkidle2' });
-  await page.waitForSelector('#LogOnDetails_UserName');
-  await page.type('#LogOnDetails_UserName', secrets.username);
-  await page.type('#LogOnDetails_Password', secrets.password);
-  await page.click('.sg-logon-button');
+  await page.goto(site.login.url, { waitUntil: 'networkidle2' });
+  await page.waitForSelector(site.login.sel.username);
+  await page.type(site.login.sel.username, secrets.username);
+  await page.type(site.login.sel.password, secrets.password);
+  await page.click(site.login.sel.submit);
 
   // 2) GET DATA FROM 1ST PAGE
-  await page.waitForSelector('.sg-homeview-table');
+  await page.waitForSelector(site.home.sel.table);
 
-  const gradeData = await page.evaluate(() => {
+  let recordIdx = 0;
+
+  /**
+   * Scrape student data from home page.
+   *
+   * @type   {promise}
+   */
+  const studentRecords = await page.evaluate((selector) => {
     // TODO: Add ability to change students. Default is the 1st in alphabet.
-    // document.querySelector('.sg-add-change-student').click();
-    // document.querySelectorAll('.sg-student-picker-row');
-    // etc. etc.
-    const student = document.querySelector('.sg-banner-chooser .sg-banner-text').innerText;
+    const student = document.querySelector(selector.studentName).innerText;
     const records = [];
 
     // Save the array index when we push new data into it.
-    const index = records.push({
+    recordIdx = records.push({
       student,
       timestamp: (new Date()).toJSON(),
-      currentAverage: [],
+      currentAverage: []
     }) - 1;
 
-    document.querySelectorAll('.sg-homeview-table tbody tr')
+    document.querySelectorAll(selector.tableRows)
       .forEach((el) => {
-        records[index].currentAverage.push({
-          class: el.querySelector('#courseName').textContent,
-          grade: el.querySelector('#average').textContent,
+        records[recordIdx].currentAverage.push({
+          class: el.querySelector(selector.courseName).innerText,
+          grade: el.querySelector(selector.courseAverage).innerText
         });
       });
 
     return records;
-  });
+  }, site.home.sel);
 
   // 3) LOAD SECOND PAGE
-  await page.goto('https://accesscenter.roundrockisd.org/HomeAccess/Content/Student/Assignments.aspx',
-    { waitUntil: 'networkidle2' });
+  await page.goto(site.cWork.url, { waitUntil: 'networkidle2' });
 
   // 4) REFRESH VIEW
-  await page.select('select#plnMain_ddlOrderBy', 'Date');
+  await page.select(site.cWork.sel.orderBy, 'Date');
   // TODO: Allow to change report card run. Default is the most current.
 
   await Promise.all([
     page.waitForNavigation(),
-    page.click('#plnMain_btnRefreshView'),
+    page.click(site.cWork.sel.refresh)
   ]);
 
   // 5) GET DATA FROM 2ND PAGE
-  const classworkData = await page.evaluate(() => {
-    const tableRows = document.querySelectorAll('#plnMain_dgAssignmentsByDate tbody .sg-asp-table-data-row');
-    const tableData = [];
 
-    // NOTE: Data formatting can be done at a later stage. Included here as a POC.
+  /**
+   * Add classwork records to student data.
+   *
+   * @type   {promise}
+   */
+  const classworkData = await page.evaluate((selector) => {
+    const tableRows = document.querySelectorAll(selector.tableRows);
+    const tableData = [];
 
     tableRows
       .forEach((el) => {
         const tds = el.querySelectorAll('td');
-        const course = tds[2].innerText;
-        const classes = {
-          '0731 - 14 Off Season': 'Off Season',
-          '0776 - 12 Spanish I B': 'Spanish I B',
-          '0827 - 17 Gateway 1': 'Gateway 1',
-          '7720 - 38 Lang Arts 7 Tag': 'TAG Lang Arts 7',
-          '7787 - 31 Tag Science 7': 'TAG Science 7',
-          '7797 - 33 Tag Tx History': 'TAG TX History',
-          '8750 - 29 Algebra I Tag': 'TAG Algebra I',
-        };
-        const category = tds[4].innerText;
-        const majors = [
-          'Assessment',
-          'Major Grades',
-          'Performance',
-          'Project',
-          'Test',
-        ];
-        // Category: a->assessment; d->daily
-        const cat = majors.includes(category) ? 'a' : 'd';
-        let score = tds[6].innerText;
-        let note = '';
-
-        if (score === 'M') {
-          score = 0;
-          note = 'M';
-        }
 
         tableData.push({
           date: tds[0].innerText,
-          course,
-          class: classes[course],
-          category,
-          cat,
-          score,
-          note,
-          assignment: tds[3].innerText,
+          course: tds[2].innerText,
+          category: tds[4].innerText,
+          score: tds[6].innerText,
+          assignment: tds[3].innerText
         });
       });
 
     return tableData;
-  });
+  }, site.cWork.sel);
 
   await browser.close();
 
-  gradeData[0].classwork = classworkData;
+  studentRecords[recordIdx].classwork = classworkData;
 
-  return gradeData;
+  return studentRecords;
 };
 
 scrape()
+  /**
+   * Massage the data.
+   * @param  {object} data  Student records.
+   * @return {object}       Massaged student records.
+   */
   .then((data) => {
+    const studentRecord = data[data.length - 1];
+    const classes = {
+      '0731 - 14 Off Season': 'Off Season',
+      '0776 - 12 Spanish I B': 'Spanish I B',
+      '0827 - 17 Gateway 1': 'Gateway 1',
+      '7720 - 38 Lang Arts 7 Tag': 'TAG Lang Arts 7',
+      '7787 - 31 Tag Science 7': 'TAG Science 7',
+      '7797 - 33 Tag Tx History': 'TAG TX History',
+      '8750 - 29 Algebra I Tag': 'TAG Algebra I'
+    };
+    const majorCategories = [
+      'Assessment',
+      'Major Grades',
+      'Performance',
+      'Project',
+      'Test'
+    ];
+
+    // Loop thru assignments and add new fields.
+    const extendedClasswork = studentRecord.classwork.map((classRecord) => {
+      const classTitle = classes[classRecord.course];
+      // Category: a->assessment; d->daily
+      const cat = majorCategories.includes(classRecord.category)
+        ? 'a'
+        : 'd';
+      let { score } = classRecord;
+      let note = '';
+
+      if (classRecord.score === 'M') {
+        score = 0;
+        note = 'M';
+      }
+
+      return {
+        date: classRecord.date,
+        course: classRecord.course,
+        class: classTitle,
+        category: classRecord.category,
+        cat,
+        score,
+        note,
+        assignment: classRecord.assignment
+      };
+    });
+
+    studentRecord.classwork = extendedClasswork;
+
+    return data;
+  })
+  /**
+   * Save the data.
+   *
+   * @param  {object}  data    The data.
+   */
+  .then((data) => {
+    // Save the data.
     const dirname = './output';
     const filename = `${dirname}/grades-${Date.now()}.json`;
 
@@ -145,6 +209,6 @@ scrape()
         err
           ? console.error('Data not written.', err)
           : console.log(`Data written to: ${filename}`)
-      ),
+      )
     );
   });
