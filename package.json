@@ -6,9 +6,13 @@
   "author": "Steve Stedman",
   "license": "WTFPL",
   "scripts": {
-    "test": "eslint rrisd.js --fix"
+    "lint": "eslint ./ --fix",
+    "scrape": "node rrisd.js",
+    "start": "node server.js",
+    "test": "eslint ./"
   },
   "dependencies": {
+    "express": "^4.17.1",
     "puppeteer": "^2.0.0"
   },
   "devDependencies": {

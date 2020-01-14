@@ -1,7 +1,20 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
-const secrets = require('./secrets');
+const secrets = require('./config/.secrets');
 
+// Make sure 'secrets' data is set up properly.
+if (secrets) {
+  const secretsMock = require('./test/config/.secrets.js');
+
+  if (!secretsMock || Object.keys(secrets).toString() !== Object.keys(secretsMock).toString()) {
+    // console.error(Object.keys(secrets).toString(), Object.keys(secretsMock).toString());
+    throw Error('Unexpected config file content.');
+  }
+} else {
+  throw Error('Missing config file. Please create ./config/.secrets.js file based on ./test/config/.secrets.js');
+}
+
+// TODO: Move DOM selectors to separate config file?
 const site = {
   login: {
     url: 'https://accesscenter.roundrockisd.org/HomeAccess/Account/LogOn',
@@ -9,6 +22,23 @@ const site = {
       username: '#LogOnDetails_UserName',
       password: '#LogOnDetails_Password',
       submit: '.sg-logon-button'
+    }
+  },
+  changeStudent: {
+    url: 'https://accesscenter.roundrockisd.org/HomeAccess/Account/LogOn',
+    sel: {
+      studentName: '.sg-banner-chooser .sg-banner-text',
+      changeBtn: '.sg-add-change-student'
+    },
+    popup: {
+      sel: {
+        parentEl: '.sg-student-picker-row',
+        studentId: '#studentId', // ID is in the value attr
+        studentName: 'sg-picker-student-name',
+        studentBldg: '.sg-picker-building',
+        studentGrade: '.sg-picker-grade',
+        submitBtn: '.sg-cancel-submit-picker:first-of-type'
+      }
     }
   },
   home: {
@@ -19,29 +49,73 @@ const site = {
       tableRows: '.sg-homeview-table tbody tr',
       courseName: '#courseName',
       courseAverage: '#average'
+    },
+    table: {
+      sel: '.sg-homeview-table',
+      rowSel: 'tbody tr',
+      cols: []
     }
   },
-  cWork: {
+  schedule: {
+    url: 'https://accesscenter.roundrockisd.org/HomeAccess/Content/Student/Classes.aspx',
+    table: {
+      sel: '.sg-asp-table',
+      rowSel: '.sg-asp-table-data-row',
+      cols: ['course', 'name', 'period', 'teacher', 'room', 'days', 'markingPeriods', 'building', 'status']
+    }
+  },
+  classWork: {
     url: 'https://accesscenter.roundrockisd.org/HomeAccess/Content/Student/Assignments.aspx',
     sel: {
-      orderBy: 'select#plnMain_ddlOrderBy',
+      fullViewBtn: '#plnMain_spnView .sg-button',
+      orderBy: 'select#plnMain_ddlOrderBy', // values: Class [default] or Date
       refresh: '#plnMain_btnRefreshView',
-      tableRows: '#plnMain_dgAssignmentsByDate tbody .sg-asp-table-data-row'
+      tableRows: '#plnMain_dgAssignmentsByDate .sg-asp-table-data-row'
+    },
+    table: {
+      sel: '.sg-asp-table',
+      rowSel: '.sg-asp-table-data-row',
+      cols: ['dueDate', 'dateAssign', 'course', 'assignment', 'category', 'points', 'score']
+    }
+  },
+  scoring: {
+    url: 'https://accesscenter.roundrockisd.org/HomeAccess/Content/Student/Assignments.aspx',
+    sel: {
+      parentEl: '.AssignmentClass',
+      courseName: 'a.sg-header-heading',
+      table: {
+        sel: '.sg-asp-table-group',
+        rowSel: '.sg-asp-table-data-row',
+        cols: ['category', 'studentPoints', 'maxPoints', 'percent', 'weight', 'points']
+      }
     }
   }
 };
 
+// TODO: Break up this monsterous `scrape()` promise.
+
+/**
+ * Scrape student grades from RRISD site.
+ *
+ * @return {Object}  Student grade record.
+ */
 const scrape = async () => {
-  const browser = await puppeteer.launch({ headless: true });
+  // 0) SET UP PUPPETEER
+
+  // Cache browser assets to speed up reloads (saves 1+ second).
+  const browser = await puppeteer.launch({
+    headless: true,
+    userDataDir: './data/puppeteer'
+  });
   const page = await browser.newPage();
 
-  // Skip loading un-needed visuals.
+  // Load only required docs and scripts to navigate.
   await page.setRequestInterception(true);
   page.on('request', (req) => {
-    if (['stylesheet', 'font', 'image'].includes(req.resourceType())) {
-      req.abort();
-    } else {
+    if (['document', 'script'].includes(req.resourceType())) {
       req.continue();
+    } else {
+      req.abort();
     }
   });
 
@@ -55,46 +129,66 @@ const scrape = async () => {
   // 2) GET DATA FROM 1ST PAGE
   await page.waitForSelector(site.home.sel.table);
 
-  let recordIdx = 0;
+  // TODO: Add ability to change students. Default is the 1st in alphabet.
+
+  /**
+   *
+   * Get student name from page.
+   *
+   * @param {object}  selector      The DOM selectors
+   */
+  const studentName = await page.evaluate((selector) => document.querySelector(selector.studentName).innerText, site.home.sel);
+
+  /**
+   * Get student ID by looking up student name from page.
+   *
+   * @param  {object}  student      The student name (key) and ID (value)
+   * @param  {string}  studentName  The student name
+   * @return {string}  Student ID
+   */
+  const studentId = await page.evaluate((student, name) => student[name], secrets.student, studentName);
 
   /**
    * Scrape student data from home page.
    *
-   * @type   {promise}
+   * @param  {String}  selector     The DOM selectors
+   * @param  {String}  studentId    The student identifier
+   * @param  {String}  studentName  The student name
+   * @return {Object}  The ongoing student record
    */
-  const studentRecords = await page.evaluate((selector) => {
-    // TODO: Add ability to change students. Default is the 1st in alphabet.
-    const student = document.querySelector(selector.studentName).innerText;
-    const records = [];
+  const studentRecord = await page.evaluate((selector, stdtId, stdtName) => {
+    const record = {};
 
-    // Save the array index when we push new data into it.
-    recordIdx = records.push({
-      student,
+    record[stdtId] = {
+      studentName: stdtName,
       timestamp: (new Date()).toJSON(),
       currentAverage: []
-    }) - 1;
+    };
 
+    // TODO: Reconsider capturing information from this 1st page.
+    // Current average is now calculated fairly accurately from classwork data.
     document.querySelectorAll(selector.tableRows)
       .forEach((el) => {
-        records[recordIdx].currentAverage.push({
+        record[stdtId].currentAverage.push({
           class: el.querySelector(selector.courseName).innerText,
           grade: el.querySelector(selector.courseAverage).innerText
         });
       });
 
-    return records;
-  }, site.home.sel);
+    return record;
+  }, site.home.sel, studentId, studentName);
 
   // 3) LOAD SECOND PAGE
-  await page.goto(site.cWork.url, { waitUntil: 'networkidle2' });
+  await page.goto(site.classWork.url, { waitUntil: 'networkidle2' });
 
-  // 4) REFRESH VIEW
-  await page.select(site.cWork.sel.orderBy, 'Date');
+  // 4) "REFRESH VIEW" TO SHOW ALL ASSIGNMENTS BY DATE (instead of by "class")
+  await page.select(site.classWork.sel.orderBy, 'Date');
+
   // TODO: Allow to change report card run. Default is the most current.
 
   await Promise.all([
     page.waitForNavigation(),
-    page.click(site.cWork.sel.refresh)
+    page.click(site.classWork.sel.refresh)
   ]);
 
   // 5) GET DATA FROM 2ND PAGE
@@ -102,7 +196,7 @@ const scrape = async () => {
   /**
    * Add classwork records to student data.
    *
-   * @type   {promise}
+   * @param {object}  selector      The DOM selectors
    */
   const classworkData = await page.evaluate((selector) => {
     const tableRows = document.querySelectorAll(selector.tableRows);
@@ -111,104 +205,81 @@ const scrape = async () => {
     tableRows
       .forEach((el) => {
         const tds = el.querySelectorAll('td');
+        const scoreImg = tds[6].querySelector('img');
 
         tableData.push({
-          date: tds[0].innerText,
+          dateDue: tds[0].innerText,
+          dateAssign: tds[1].innerText.trim(),
           course: tds[2].innerText,
+          assignment: tds[3].innerText,
           category: tds[4].innerText,
           score: tds[6].innerText,
-          assignment: tds[3].innerText
+          comment: scoreImg ? scoreImg.title : ''
         });
       });
 
     return tableData;
-  }, site.cWork.sel);
+  }, site.classWork.sel);
 
   await browser.close();
 
-  studentRecords[recordIdx].classwork = classworkData;
+  studentRecord[studentId].classwork = classworkData;
 
-  return studentRecords;
+  return studentRecord;
 };
 
-scrape()
-  /**
-   * Massage the data.
-   * @param  {object} data  Student records.
-   * @return {object}       Massaged student records.
-   */
-  .then((data) => {
-    const studentRecord = data[data.length - 1];
-    const classes = {
-      '0731 - 14 Off Season': 'Off Season',
-      '0776 - 12 Spanish I B': 'Spanish I B',
-      '0827 - 17 Gateway 1': 'Gateway 1',
-      '7720 - 38 Lang Arts 7 Tag': 'TAG Lang Arts 7',
-      '7787 - 31 Tag Science 7': 'TAG Science 7',
-      '7797 - 33 Tag Tx History': 'TAG TX History',
-      '8750 - 29 Algebra I Tag': 'TAG Algebra I'
-    };
-    const majorCategories = [
-      'Assessment',
-      'Major Grades',
-      'Performance',
-      'Project',
-      'Test'
-    ];
+/**
+ * Save the data to file.
+ *
+ * @param  {object}  data    The grades data.
+ */
+const saveDataToFile = (data) => {
+  // Save the data.
+  const dirname = './data';
+  const filename = `${dirname}/grades.json`;
 
-    // Loop thru assignments and add new fields.
-    const extendedClasswork = studentRecord.classwork.map((classRecord) => {
-      const classTitle = classes[classRecord.course];
-      // Category: a->assessment; d->daily
-      const cat = majorCategories.includes(classRecord.category)
-        ? 'a'
-        : 'd';
-      let { score } = classRecord;
-      let note = '';
+  // Create output directory if it doesn't already exist.
+  if (!fs.existsSync(dirname)) {
+    fs.mkdirSync(dirname);
+  }
 
-      if (classRecord.score === 'M') {
-        score = 0;
-        note = 'M';
+  fs.writeFile(
+    filename,
+    JSON.stringify(data, null, 2),
+    (wrErr) => {
+      if (wrErr) {
+        throw Error(`Data not written.\n${wrErr}`);
       }
 
-      return {
-        date: classRecord.date,
-        course: classRecord.course,
-        class: classTitle,
-        category: classRecord.category,
-        cat,
-        score,
-        note,
-        assignment: classRecord.assignment
-      };
-    });
+      // eslint-disable-next-line no-console
+      console.log(`Data written to: ${filename}`);
 
-    studentRecord.classwork = extendedClasswork;
+      // Create archive copy of grades file.
+      const archiveDir = './data/archive';
+      const archiveFile = `${archiveDir}/grades-${Date.now()}.json`;
 
-    return data;
-  })
-  /**
-   * Save the data.
-   *
-   * @param  {object}  data    The data.
-   */
-  .then((data) => {
-    // Save the data.
-    const dirname = './output';
-    const filename = `${dirname}/grades-${Date.now()}.json`;
+      // Create output directory if it doesn't already exist.
+      if (!fs.existsSync(archiveDir)) {
+        fs.mkdirSync(archiveDir);
+      }
 
-    // Create output directory if it doesn't already exist.
-    if (!fs.existsSync(dirname)) {
-      fs.mkdirSync(dirname);
+      fs.copyFile(
+        filename,
+        archiveFile,
+        (cpErr) => (
+          cpErr
+            // eslint-disable-next-line no-console
+            ? console.error('Archive file not copied.', cpErr)
+            // eslint-disable-next-line no-console
+            : console.log(`Archive data copied to: ${archiveFile}.`)
+        )
+      );
     }
+  );
+};
 
-    fs.writeFile(
-      filename,
-      JSON.stringify(data, null, 2),
-      (err) => (
-        err
-          ? console.error('Data not written.', err)
-          : console.log(`Data written to: ${filename}`)
-      )
-    );
-  });
+/**
+ * Run the scraper.
+ */
+scrape()
+  .then(saveDataToFile);
