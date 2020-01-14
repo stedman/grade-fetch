@@ -126,7 +126,7 @@ const scrape = async () => {
   await page.type(site.login.sel.password, secrets.password);
   await page.click(site.login.sel.submit);
 
-  // 2) GET DATA FROM 1ST PAGE
+  // 2) GET DATA FROM HOME PAGE
   await page.waitForSelector(site.home.sel.table);
 
   // TODO: Add ability to change students. Default is the 1st in alphabet.
@@ -148,37 +148,7 @@ const scrape = async () => {
    */
   const studentId = await page.evaluate((student, name) => student[name], secrets.student, studentName);
 
-  /**
-   * Scrape student data from home page.
-   *
-   * @param  {String}  selector     The DOM selectors
-   * @param  {String}  studentId    The student identifier
-   * @param  {String}  studentName  The student name
-   * @return {Object}  The ongoing student record
-   */
-  const studentRecord = await page.evaluate((selector, stdtId, stdtName) => {
-    const record = {};
-
-    record[stdtId] = {
-      studentName: stdtName,
-      timestamp: (new Date()).toJSON(),
-      currentAverage: []
-    };
-
-    // TODO: Reconsider capturing information from this 1st page.
-    // Current average is now calculated fairly accurately from classwork data.
-    document.querySelectorAll(selector.tableRows)
-      .forEach((el) => {
-        record[stdtId].currentAverage.push({
-          class: el.querySelector(selector.courseName).innerText,
-          grade: el.querySelector(selector.courseAverage).innerText
-        });
-      });
-
-    return record;
-  }, site.home.sel, studentId, studentName);
-
-  // 3) LOAD SECOND PAGE
+  // 3) LOAD CLASSWORK PAGE
   await page.goto(site.classWork.url, { waitUntil: 'networkidle2' });
 
   // 4) "REFRESH VIEW" TO SHOW ALL ASSIGNMENTS BY DATE (instead of by "class")
@@ -191,10 +161,10 @@ const scrape = async () => {
     page.click(site.classWork.sel.refresh)
   ]);
 
-  // 5) GET DATA FROM 2ND PAGE
+  // 5) GET DATA FROM CLASSWORK PAGE
 
   /**
-   * Add classwork records to student data.
+   * Scrape student classwork and grades.
    *
    * @param {object}  selector      The DOM selectors
    */
@@ -221,9 +191,27 @@ const scrape = async () => {
     return tableData;
   }, site.classWork.sel);
 
-  await browser.close();
+  /**
+   * Build student data record with classwork data.
+   *
+   * @param  {String}  stdtId    The student identifier
+   * @param  {String}  stdtName  The student name
+   * @param  {Object}  cwData    The classwork data
+   * @return {Object}  The ongoing student record
+   */
+  const studentRecord = await page.evaluate((stdtId, stdtName, cwData) => {
+    const record = {};
 
-  studentRecord[studentId].classwork = classworkData;
+    record[stdtId] = {
+      studentName: stdtName,
+      timestamp: (new Date()).toJSON(),
+      classwork: cwData
+    };
+
+    return record;
+  }, studentId, studentName, classworkData);
+
+  await browser.close();
 
   return studentRecord;
 };
@@ -231,7 +219,7 @@ const scrape = async () => {
 /**
  * Save the data to file.
  *
- * @param  {object}  data    The grades data.
+ * @param  {object}  data    The student data.
  */
 const saveDataToFile = (data) => {
   // Save the data.
