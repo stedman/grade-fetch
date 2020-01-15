@@ -1,0 +1,26 @@
+{
+  "123456": {
+    "studentName": "Dick Smothers",
+    "timestamp": "2020-01-14T21:53:20.231Z",
+    "classwork": [
+      {
+        "dateDue": "12/19/2019",
+        "dateAssign": "12/09/2019",
+        "course": "0123 - 1 Reading",
+        "assignment": "Short Story",
+        "category": "Assessment",
+        "score": "95.00",
+        "comment": ""
+      },
+      {
+        "dateDue": "12/19/2019",
+        "dateAssign": "12/09/2019",
+        "course": "0123 - 1 Reading",
+        "assignment": "Short Story",
+        "category": "Daily",
+        "score": "75.00",
+        "comment": "Late Work"
+      }
+    ]
+  }
+}

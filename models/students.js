@@ -9,21 +9,21 @@ class Students {
   }
 
   /**
-   * Gets the student record.
-   *
-   * @return {object}  The student record.
-   */
-  getStudentRecord() {
-    return students[this.studentId];
-  }
-
-  /**
    * Gets all student records.
    *
    * @return {object}  All student records.
    */
   static getAllStudentRecords() {
     return students;
+  }
+
+  /**
+   * Gets a student record.
+   *
+   * @return {object}  The student record.
+   */
+  getStudentRecord() {
+    return students[this.studentId];
   }
 }
 

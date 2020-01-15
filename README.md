@@ -16,7 +16,7 @@ I chose to keep the app together and in one repo for the time being for convenie
 2. [x] Add [Puppeteer](https://pptr.dev/) to scrape student information.
 3. [ ] Create API to save scraped data and retrieve for visualization.
    1. [x] Add [Express](https://expressjs.com) web framework. Set up rudimentary data, models, and routes.
-   2. [ ] Add tests... [Jest](https://jestjs.io), [MochaJS](https://mochajs.org)??
+   2. [x] Add [Jest](https://jestjs.io) and initial tests
    3. [ ] Add [MongoDB](https://mongodb.com) + [Mongoose](https://) and migrate data from flat files.
 4. [ ] Add [Vue](https://nuxtjs.org) templating.
 5. [ ] Add charting.

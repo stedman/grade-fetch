@@ -1,0 +1,45 @@
+{
+  "123456": {
+    "name": "Dick Smothers",
+    "fullname": "Smothers, Dick",
+    "year": {
+      "06": {
+        "building": "Big Middle School",
+        "homeroom": {
+          "room": "2135",
+          "teacher": "Knotts, Don"
+        },
+        "courses": [
+          "787 - 1",
+          "776 - 2",
+          "797 - 3",
+          "731 - 4",
+          "827 - 7",
+          "828 - 7",
+          "720 - 8",
+          "750 - 9"
+        ]
+      }
+    }
+  },
+  "234567": {
+    "name": "Jane Curtain",
+    "fullname": "Curtain, Jane",
+    "year": {
+      "03": {
+        "building": "Big Elementary School",
+        "homeroom": {
+          "room": "1234",
+          "teacher": "Struthers, Sally"
+        },
+        "courses": [
+          "410 - 2",
+          "420 - 2",
+          "440 - 2",
+          "450 - 2",
+          "460 - 2"
+        ]
+      }
+    }
+  }
+}

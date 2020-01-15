@@ -1,4 +1,4 @@
-const runs = require('../data/intervals.json');
+const intervals = require('../data/intervals.json');
 const gradesData = require('../data/grades.json');
 const Courses = require('./courses');
 
@@ -48,7 +48,7 @@ class Grades {
    * @param  {number}  [runId]  The run identifier
    * @return {object}  The grade snapshot.
    */
-  getGradeSnapshot(runId = this.constructor.getCurrentRunId()) {
+  getGradeSnapshot(runId = this.constructor.getRunIdForDate()) {
     const allStudentClasswork = this.getAllStudentClassworkEnhanced();
     const runDateInMs = this.constructor.getRunDateInMs(runId);
 
@@ -84,21 +84,22 @@ class Grades {
   }
 
   /**
-   * Gets the current run identifier.
+   * Gets the run identifier for a date.
    *
+   * @param  {string}  [targetDate]  The target date. Default is today.
    * @return {number}  The current run identifier.
    */
-  static getCurrentRunId() {
-    return runs.findIndex((runEnd, idx) => {
-      const prevRunEnd = runs[idx - 1];
+  static getRunIdForDate(targetDate = new Date()) {
+    return intervals.findIndex((runEnd, idx) => {
+      const prevRunEnd = intervals[idx - 1];
 
       if (prevRunEnd === undefined) return false;
 
       const start = new Date(prevRunEnd);
       const end = new Date(runEnd);
-      const today = new Date();
+      const target = new Date(targetDate);
 
-      return today > start && today < end;
+      return target > start && target < end;
     });
   }
 
@@ -108,8 +109,8 @@ class Grades {
    * @param  {number}  [runId]  The run identifier
    * @return {object}  The run date in milliseconds.
    */
-  static getRunDateInMs(runId = this.constructor.getCurrentRunId()) {
-    const prevRunEnd = runs[runId - 1];
+  static getRunDateInMs(runId = this.constructor.getRunIdForDate()) {
+    const prevRunEnd = intervals[runId - 1];
 
     if (prevRunEnd === undefined) return false;
 
@@ -117,7 +118,7 @@ class Grades {
 
     return {
       start: convertToMs(prevRunEnd),
-      end: convertToMs(runs[runId])
+      end: convertToMs(intervals[runId])
     };
   }
 }
