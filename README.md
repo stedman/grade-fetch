@@ -12,15 +12,38 @@ I chose to keep the app together and in one repo for the time being for convenie
 
 ### Roadmap
 
-1. [x] Set up environment: [ESLint](https://eslint.org)
-2. [x] Add [Puppeteer](https://pptr.dev/) to scrape student information.
+1. [x] Set up environment
+   1. [x] Node (v12) + npm
+   2. [x] [ESLint](https://eslint.org)
+   3. [x] [.editorconfig](https://editorconfig.org)
+2. [x] Scrape student information from school website.
+   1. [x] Add [Puppeteer](https://pptr.dev/).
+   2. [x] Set up DOM selectors to capture page data.
+   3. [x] Design data objects.
+   4. [x] Store captured data (directly) in flat files.
 3. [ ] Create REST API to save scraped data and retrieve for visualization.
-   1. [x] Add [Express](https://expressjs.com) web framework. Set up rudimentary data, models, and routes.
-   2. [x] Add [Jest](https://jestjs.io) and initial tests
-4. [ ] Add [Vue](https://nuxtjs.org) templating.
-5. [ ] Add charting.
-6. [ ] Add [MongoDB](https://mongodb.com) + [Mongoose](https://) and migrate data from flat files.
-7. [ ] Move from local app to cloud... AWS??
+   1. [x] Add [Express](https://expressjs.com) web framework.
+   2. [x] Add rudimentary models and routes for data retrieval.
+   3. [ ] Add models and routes for data saves.
+   4. [ ] Migrate captured data saves to use API.
+4. [x] Set up test framework.
+   1. [x] Add [Jest](https://jestjs.io).
+   2. [x] Add initial tests.
+5. [ ] Migrate REST API to GraphQL.
+6. [ ] Add "view" framework.
+   1. [ ] Add [Vue](https://nuxtjs.org).
+   2. [ ] Add [charts](https://madewithvuejs.com/charts).
+7. [ ] Migrate data from flat file to database.
+   1. [ ] Add [MongoDB](https://mongodb.com) and [Mongoose]([https://](https://mongoosejs.com)).
+   2. [ ] Migrate models from using flat files to using Mongoose.
+8. [ ] Add authentication.
+9. [ ] Migrate from local app to cloud.
+
+#### Additional considerations for Roadmap
+
+* Migrate to [Typescript](https://www.typescriptlang.org) for its type checking, autocompletion in VSCode, and because it's the latest hotness.
+* Migrate to ES6 modules. Node 12+ supports the new format, but my initial tests failed. Add [Babel](https://babeljs.io)?
+* Create a [ReactJS](https://reactjs.org) version of the client-side?
 
 ---
 
