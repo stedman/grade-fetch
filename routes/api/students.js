@@ -3,6 +3,8 @@ const Students = require('../../models/students');
 const Grades = require('../../models/grades');
 
 const router = express.Router();
+// TODO: automate hostname for prod/dev
+const rootUrl = 'http://localhost:3000/api/v1/students';
 
 router.use((req, res, next) => {
   console.log('Time:', (new Date()).toUTCString());
@@ -13,10 +15,18 @@ router.use((req, res, next) => {
  * Get all student records.
  */
 router.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Student records.',
-    students: Students.getAllStudentRecords()
+  const students = Students.getAllStudentRecords();
+  const studentRecords = [];
+
+  Object.keys(students).forEach((id) => {
+    studentRecords.push({
+      id,
+      name: students[id].name,
+      student_url: `${rootUrl}/${id}`
+    });
   });
+
+  res.status(200).json(studentRecords);
 });
 
 /**
@@ -28,24 +38,11 @@ router.get('/:studentId([0-9]{6})', (req, res) => {
   const student = new Students(req.params.studentId);
 
   res.status(200).json({
-    message: `Records for student: ${req.params.studentId}`,
-    studentId: req.params.studentId,
-    studentName: student.getStudentRecord().name
-  });
-});
-
-/**
- * TODO: Get student grades.
- *
- * @param {number}  studentId   The school-provided student identifier.
- */
-router.get('/:studentId([0-9]{6})/grades', (req, res) => {
-  const student = new Students(req.params.studentId);
-
-  res.status(200).json({
-    message: `Grades for student: ${req.params.studentId}`,
-    studentId: req.params.studentId,
-    studentName: student.getStudentRecord().name
+    id: req.params.studentId,
+    name: student.getStudentRecord().name,
+    assignments_url: `${rootUrl}/${req.params.studentId}/assignments`,
+    grades_url: `${rootUrl}/${req.params.studentId}/grades`,
+    grades_snapshot_url: `${rootUrl}/${req.params.studentId}/grades/snapshot{/runId}`
   });
 });
 
@@ -59,10 +56,24 @@ router.get('/:studentId([0-9]{6})/assignments', (req, res) => {
   const grades = new Grades(req.params.studentId);
 
   res.status(200).json({
-    message: `Assignments for student: ${req.params.studentId}`,
-    studentId: req.params.studentId,
-    studentName: student.getStudentRecord().name,
-    grades: grades.augmentAllStudentClasswork()
+    id: req.params.studentId,
+    name: student.getStudentRecord().name,
+    assignments: grades.augmentAllStudentClasswork()
+  });
+});
+
+/**
+ * TODO: Get student grades.
+ *
+ * @param {number}  studentId   The school-provided student identifier.
+ */
+router.get('/:studentId([0-9]{6})/grades', (req, res) => {
+  const student = new Students(req.params.studentId);
+
+  res.status(200).json({
+    message: 'TODO: Grades for student',
+    id: req.params.studentId,
+    name: student.getStudentRecord().name
   });
 });
 
@@ -77,9 +88,8 @@ router.get('/:studentId([0-9]{6})/grades/snapshot/:runId([0-9]{1})?', (req, res)
   const grades = new Grades(req.params.studentId);
 
   res.status(200).json({
-    message: `Today's class grade average for student: ${req.params.studentId}`,
-    studentId: req.params.studentId,
-    studentName: student.getStudentRecord().name,
+    id: req.params.studentId,
+    name: student.getStudentRecord().name,
     snapshot: grades.getGradeSnapshot(req.params.runId)
   });
 });
