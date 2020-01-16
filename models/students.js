@@ -1,4 +1,4 @@
-const students = require('../data/student.json');
+const studentData = require('../data/student.json');
 
 class Students {
   /**
@@ -14,7 +14,7 @@ class Students {
    * @return {object}  All student records.
    */
   static getAllStudentRecords() {
-    return students;
+    return studentData;
   }
 
   /**
@@ -23,7 +23,7 @@ class Students {
    * @return {object}  The student record.
    */
   getStudentRecord() {
-    return students[this.studentId];
+    return studentData[this.studentId];
   }
 }
 

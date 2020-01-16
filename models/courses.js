@@ -1,4 +1,4 @@
-const courses = require('../data/course.json');
+const courseData = require('../data/course.json');
 
 class Courses {
   /**
@@ -14,7 +14,7 @@ class Courses {
    * @return {object}  The course.
    */
   getCourse() {
-    return courses[this.courseId];
+    return courseData[this.courseId];
   }
 
   /**

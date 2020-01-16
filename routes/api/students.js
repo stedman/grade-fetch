@@ -4,10 +4,10 @@ const Grades = require('../../models/grades');
 
 const router = express.Router();
 // TODO: automate hostname for prod/dev
-const rootUrl = 'http://localhost:3000/api/v1/students';
+const rootUrl = 'http://localhost:3001/api/v1/students';
 
 router.use((req, res, next) => {
-  console.log('Time:', (new Date()).toUTCString());
+  console.log(`${new Date().toUTCString()}  ${req.method}  ${req.originalUrl}`);
   next();
 });
 

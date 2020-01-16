@@ -1,5 +1,5 @@
-const intervals = require('../data/intervals.json');
-const gradesData = require('../data/grades.json');
+const classworkData = require('../data/classwork.json');
+const intervalData = require('../data/intervals.json');
 const Courses = require('./courses');
 
 class Grades {
@@ -16,7 +16,7 @@ class Grades {
    * @return {object}  All student classwork.
    */
   getAllStudentClasswork() {
-    return gradesData[this.studentId] ? gradesData[this.studentId].classwork : {};
+    return classworkData[this.studentId] ? classworkData[this.studentId].classwork : {};
   }
 
   /**
@@ -27,7 +27,7 @@ class Grades {
   getAllStudentClassworkEnhanced() {
     const allStudentClasswork = this.getAllStudentClasswork();
 
-    return allStudentClasswork.map((work) => {
+    const stuff = allStudentClasswork.map((work) => {
       const newWork = work;
 
       newWork.dateDueMs = new Date(work.dateDue).getTime();
@@ -36,10 +36,12 @@ class Grades {
       // Get matching course using first 9 chars of classwork course info.
       const course = new Courses(newWork.courseId);
 
-      newWork.catWeight = course.getCategoryWeight(work.category);
+      newWork.catWeight = course.getCourse().category[work.category];
 
       return newWork;
     });
+
+    return stuff;
   }
 
   /**
@@ -55,6 +57,7 @@ class Grades {
     const classwork = {};
 
     allStudentClasswork.forEach((work) => {
+      // Use only classwork in the Marking Period range
       if (work.dateDueMs > runDateInMs.start && work.dateDueMs < runDateInMs.end) {
         classwork[work.courseId] = classwork[work.courseId] || {};
         classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
@@ -74,21 +77,24 @@ class Grades {
       // As we loop thru the results, remove active categories.
       // Subtract the weights of the inactive categories from 1.
       // Then divide the course totals by this weight adjustment.
-      const courseData = new Courses(cId).getCourse();
+      const courseData = new Courses(cId).getCourse().category;
+      const courseCatClone = { ...courseData };
 
       const courseTotal = Object.keys(courseClasswork).reduce((courseTotalAcc, cat) => {
         const catScores = courseClasswork[cat];
         const count = catScores.length;
-        const catTotal = catScores.reduce((catTotalAcc, score) => catTotalAcc + score, 0);
+        const catTotal = catScores.reduce((catTotalAcc, score) => {
+          return catTotalAcc + score;
+        }, 0);
 
-        delete courseData.category[cat];
+        delete courseCatClone[cat];
 
         return courseTotalAcc + catTotal / count;
       }, 0);
 
       // Calculate weight adjustment as described above. Default to 1 if result is 0 (or undefined).
       const weightAdjustment =
-        Object.values(courseData.category).reduce((catTotal, catWeight) => {
+        Object.values(courseCatClone).reduce((catTotal, catWeight) => {
           return catTotal - catWeight;
         }, 1) || 1;
 
@@ -107,8 +113,8 @@ class Grades {
    * @return {number}  The current run identifier.
    */
   static getRunIdForDate(targetDate = new Date()) {
-    return intervals.findIndex((runEnd, idx) => {
-      const prevRunEnd = intervals[idx - 1];
+    return intervalData.findIndex((runEnd, idx) => {
+      const prevRunEnd = intervalData[idx - 1];
 
       if (prevRunEnd === undefined) return false;
 
@@ -127,7 +133,7 @@ class Grades {
    * @return {object}  The run date in milliseconds.
    */
   static getRunDateInMs(runId = this.constructor.getRunIdForDate()) {
-    const prevRunEnd = intervals[runId - 1];
+    const prevRunEnd = intervalData[runId - 1];
 
     if (prevRunEnd === undefined) return false;
 
@@ -135,7 +141,7 @@ class Grades {
 
     return {
       start: convertToMs(prevRunEnd),
-      end: convertToMs(intervals[runId])
+      end: convertToMs(intervalData[runId])
     };
   }
 }
