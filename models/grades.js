@@ -30,7 +30,7 @@ class Grades {
     return allStudentClasswork.map((work) => {
       const newWork = work;
 
-      newWork.dateDueMs = (new Date(work.dateDue)).getTime();
+      newWork.dateDueMs = new Date(work.dateDue).getTime();
       newWork.courseId = work.course.substring(0, 9).trim();
 
       // Get matching course using first 9 chars of classwork course info.
@@ -58,29 +58,46 @@ class Grades {
       if (work.dateDueMs > runDateInMs.start && work.dateDueMs < runDateInMs.end) {
         classwork[work.courseId] = classwork[work.courseId] || {};
         classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
-        classwork[work.courseId][work.category].push(Number(work.score) * work.catWeight);
+
+        if (work.score !== '') {
+          classwork[work.courseId][work.category].push(Number(work.score) * work.catWeight);
+        }
       }
     });
 
-    const output = {};
+    const courseAverageGrade = {};
 
     Object.keys(classwork).map((cId) => {
-      const course = classwork[cId];
+      const courseClasswork = classwork[cId];
 
-      const courseTotal = Object.keys(course).reduce((courseTotalAcc, cat) => {
-        const courseCat = course[cat];
-        const count = courseCat.length;
-        const catTotal = courseCat.reduce((catTotalAcc, catScores) => catTotalAcc + catScores, 0);
+      // Get all possible course categories.
+      // As we loop thru the results, remove active categories.
+      // Subtract the weights of the inactive categories from 1.
+      // Then divide the course totals by this weight adjustment.
+      const courseData = new Courses(cId).getCourse();
 
-        return courseTotalAcc + (catTotal / count);
+      const courseTotal = Object.keys(courseClasswork).reduce((courseTotalAcc, cat) => {
+        const catScores = courseClasswork[cat];
+        const count = catScores.length;
+        const catTotal = catScores.reduce((catTotalAcc, score) => catTotalAcc + score, 0);
+
+        delete courseData.category[cat];
+
+        return courseTotalAcc + catTotal / count;
       }, 0);
 
-      output[cId] = courseTotal.toFixed(2);
+      // Calculate weight adjustment as described above. Default to 1 if result is 0 (or undefined).
+      const weightAdjustment =
+        Object.values(courseData.category).reduce((catTotal, catWeight) => {
+          return catTotal - catWeight;
+        }, 1) || 1;
 
-      return output[cId];
+      courseAverageGrade[cId] = (courseTotal / weightAdjustment).toFixed(2);
+
+      return courseAverageGrade[cId];
     });
 
-    return output;
+    return courseAverageGrade;
   }
 
   /**
@@ -114,7 +131,7 @@ class Grades {
 
     if (prevRunEnd === undefined) return false;
 
-    const convertToMs = (time) => (new Date(time)).getTime();
+    const convertToMs = (time) => new Date(time).getTime();
 
     return {
       start: convertToMs(prevRunEnd),

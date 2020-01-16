@@ -18,7 +18,7 @@ class Courses {
   }
 
   /**
-   * Gets the category weight.
+   * Gets the scoring weight for specific course and category.
    *
    * @param  {string}  catName  The category name
    * @return {number}  The category weight.
