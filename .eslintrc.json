@@ -1,10 +1,16 @@
 {
-  "extends": "airbnb",
+  "extends": [
+    "airbnb",
+    "plugin:prettier/recommended"
+  ],
   "env": {
     "browser": true,
     "node": true
   },
   "rules": {
-    "comma-dangle": ["error", "never"]
+    "comma-dangle": [
+      "error",
+      "never"
+    ]
   }
 }
