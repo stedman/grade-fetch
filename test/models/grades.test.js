@@ -8,12 +8,12 @@ const studentId = 123456;
 const grades = new Grades(studentId);
 
 describe('/models/grades/', () => {
-  test('getAllStudentClasswork() should return correct student classwork', () => {
-    expect(grades.getAllStudentClasswork()).toMatchObject(rawMockData[studentId].classwork);
+  test('getStudentClassworkDataData() should return correct student classwork', () => {
+    expect(grades.getStudentClassworkData()).toMatchObject(rawMockData[studentId].classwork);
   });
 
-  test('getAllStudentClassworkEnhanced() should return enhanced classwork data', () => {
-    const studentGrades = grades.getAllStudentClassworkEnhanced();
+  test('getStudentClasswork() should return enhanced classwork data', () => {
+    const studentGrades = grades.getStudentClasswork();
 
     // check initial data
     expect(studentGrades[0].score).toBe('95.00');
@@ -21,8 +21,24 @@ describe('/models/grades/', () => {
     expect(studentGrades[0].catWeight).toEqual(0.5);
   });
 
-  test('getGradeSnapshot()', () => {
-    expect(grades.getGradeSnapshot(3)).toMatchObject({ '0123 - 1': '85.00' });
+  test('getStudentClassworkPeriod()', () => {
+    expect(grades.getStudentClassworkPeriod(3)).toMatchObject(rawMockData[studentId].classwork);
+  });
+
+  test('getStudentClassworkGrades()', () => {
+    expect(grades.getStudentClassworkGrades(3)).toMatchObject({
+      '0123 - 1': { Assessment: [95], Daily: [75] }
+    });
+  });
+
+  test('getStudentClassworkGradesWeighted()', () => {
+    expect(grades.getStudentClassworkGradesWeighted(3)).toMatchObject({
+      '0123 - 1': { Assessment: [47.5], Daily: [37.5] }
+    });
+  });
+
+  test('getStudentClassworkGradesAverage()', () => {
+    expect(grades.getStudentClassworkGradesAverage(3)).toMatchObject({ '0123 - 1': '85.00' });
   });
 
   test('getRunIdForDate()', () => {

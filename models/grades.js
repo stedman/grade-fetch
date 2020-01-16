@@ -11,21 +11,21 @@ class Grades {
   }
 
   /**
-   * Gets all student classwork.
+   * Gets all student classwork directly from fetched data.
    *
    * @return {object}  All student classwork.
    */
-  getAllStudentClasswork() {
+  getStudentClassworkData() {
     return classworkData[this.studentId] ? classworkData[this.studentId].classwork : {};
   }
 
   /**
-   * Adds modified properties to student classwork data.
+   * Gets student classwork.
    *
    * @return {object}  All student classwork with enhancements.
    */
-  getAllStudentClassworkEnhanced() {
-    const allStudentClasswork = this.getAllStudentClasswork();
+  getStudentClasswork() {
+    const allStudentClasswork = this.getStudentClassworkData();
 
     const stuff = allStudentClasswork.map((work) => {
       const newWork = work;
@@ -45,29 +45,70 @@ class Grades {
   }
 
   /**
-   * Gets the grade snapshot.
+   * Gets a student's classwork for specific Marking Period (report card run).
+   *
+   * @param  {number}  [runId]  The run identifier (Marking Period)
+   * @return {object}  The classwork within a Marking Period range.
+   */
+  getStudentClassworkPeriod(runId = this.constructor.getRunIdForDate()) {
+    const runDateInMs = this.constructor.getRunDateInMs(runId);
+
+    return this.getStudentClasswork().filter((work) => {
+      // Use only classwork in the Marking Period range
+      return work.dateDueMs > runDateInMs.start && work.dateDueMs < runDateInMs.end;
+    });
+  }
+
+  /**
+   * Gets grades for classwork grouped into course and category.
+   *
+   * @param  {number}  [runId]  The run identifier (Marking Period)
+   * @return {object}  The grade snapshot.
+   */
+  getStudentClassworkGrades(runId = this.constructor.getRunIdForDate()) {
+    const classwork = {};
+
+    this.getStudentClassworkPeriod(runId).forEach((work) => {
+      classwork[work.courseId] = classwork[work.courseId] || {};
+      classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
+
+      if (work.score !== '') {
+        classwork[work.courseId][work.category].push(Number(work.score));
+      }
+    });
+
+    return classwork;
+  }
+
+  /**
+   * Gets weighted grades for classwork grouped into course and category.
    *
    * @param  {number}  [runId]  The run identifier
    * @return {object}  The grade snapshot.
    */
-  getGradeSnapshot(runId = this.constructor.getRunIdForDate()) {
-    const allStudentClasswork = this.getAllStudentClassworkEnhanced();
-    const runDateInMs = this.constructor.getRunDateInMs(runId);
-
+  getStudentClassworkGradesWeighted(runId = this.constructor.getRunIdForDate()) {
     const classwork = {};
 
-    allStudentClasswork.forEach((work) => {
-      // Use only classwork in the Marking Period range
-      if (work.dateDueMs > runDateInMs.start && work.dateDueMs < runDateInMs.end) {
-        classwork[work.courseId] = classwork[work.courseId] || {};
-        classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
+    this.getStudentClassworkPeriod(runId).forEach((work) => {
+      classwork[work.courseId] = classwork[work.courseId] || {};
+      classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
 
-        if (work.score !== '') {
-          classwork[work.courseId][work.category].push(Number(work.score) * work.catWeight);
-        }
+      if (work.score !== '') {
+        classwork[work.courseId][work.category].push(Number(work.score) * work.catWeight);
       }
     });
 
+    return classwork;
+  }
+
+  /**
+   * Gets the grade average for classwork in the Marked Period.
+   *
+   * @param  {number}  [runId]  The run identifier
+   * @return {object}  The grade snapshot.
+   */
+  getStudentClassworkGradesAverage(runId = this.constructor.getRunIdForDate()) {
+    const classwork = this.getStudentClassworkGradesWeighted(runId);
     const courseAverageGrade = {};
 
     Object.keys(classwork).map((cId) => {
