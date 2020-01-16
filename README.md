@@ -41,6 +41,7 @@ I chose to keep the app together and in one repo for the time being for convenie
 
 #### Additional considerations for Roadmap
 
+* Use Docker container for MongoDB.
 * Migrate to [Typescript](https://www.typescriptlang.org) for its type checking, autocompletion in VSCode, and because it's the latest hotness.
 * Migrate to ES6 modules. Node 12+ supports the new format, but my initial tests failed. Add [Babel](https://babeljs.io)?
 * Create a [ReactJS](https://reactjs.org) version of the client-side?
