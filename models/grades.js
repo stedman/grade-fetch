@@ -69,10 +69,9 @@ class Grades {
     const classwork = {};
 
     this.getStudentClassworkPeriod(runId).forEach((work) => {
-      classwork[work.courseId] = classwork[work.courseId] || {};
-      classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
-
       if (work.score !== '') {
+        classwork[work.courseId] = classwork[work.courseId] || {};
+        classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
         classwork[work.courseId][work.category].push(Number(work.score));
       }
     });
@@ -90,10 +89,9 @@ class Grades {
     const classwork = {};
 
     this.getStudentClassworkPeriod(runId).forEach((work) => {
-      classwork[work.courseId] = classwork[work.courseId] || {};
-      classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
-
       if (work.score !== '') {
+        classwork[work.courseId] = classwork[work.courseId] || {};
+        classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
         classwork[work.courseId][work.category].push(Number(work.score) * work.catWeight);
       }
     });
