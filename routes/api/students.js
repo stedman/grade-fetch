@@ -1,12 +1,13 @@
 const express = require('express');
-const Students = require('../../models/students');
-const Grades = require('../../models/grades');
+const student = require('../../models/student');
+const grade = require('../../models/grade');
 
 const router = express.Router();
 // TODO: automate hostname for prod/dev
 const rootUrl = 'http://localhost:3001/api/v1/students';
 
 router.use((req, res, next) => {
+  // eslint-disable-next-line no-console
   console.log(`${new Date().toUTCString()}  ${req.method}  ${req.originalUrl}`);
   next();
 });
@@ -15,7 +16,7 @@ router.use((req, res, next) => {
  * Get all student records.
  */
 router.get('/', (req, res) => {
-  const students = Students.getAllStudentRecords();
+  const students = student.getAllStudentRecords();
   const studentRecords = [];
 
   Object.keys(students).forEach((id) => {
@@ -35,14 +36,14 @@ router.get('/', (req, res) => {
  * @param {number}  studentId   The school-provided student identifier.
  */
 router.get('/:studentId([0-9]{6})', (req, res) => {
-  const student = new Students(req.params.studentId);
+  const { studentId } = req.params;
 
   res.status(200).json({
-    id: req.params.studentId,
-    name: student.getStudentRecord().name,
-    assignments_url: `${rootUrl}/${req.params.studentId}/assignments{/rundId}`,
-    grades_url: `${rootUrl}/${req.params.studentId}/grades{/runId}`,
-    grades_snapshot_url: `${rootUrl}/${req.params.studentId}/grades/snapshot{/runId}`
+    id: studentId,
+    name: student.getStudentRecord(studentId).name,
+    assignments_url: `${rootUrl}/${studentId}/assignments{/rundId}`,
+    grades_url: `${rootUrl}/${studentId}/grades{/runId}`,
+    grades_snapshot_url: `${rootUrl}/${studentId}/grades/snapshot{/runId}`
   });
 });
 
@@ -52,13 +53,12 @@ router.get('/:studentId([0-9]{6})', (req, res) => {
  * @param {number}  studentId   The school-provided student identifier.
  */
 router.get('/:studentId([0-9]{6})/assignments', (req, res) => {
-  const student = new Students(req.params.studentId);
-  const grades = new Grades(req.params.studentId);
+  const { studentId } = req.params;
 
   res.status(200).json({
-    id: req.params.studentId,
-    name: student.getStudentRecord().name,
-    assignments: grades.getStudentClasswork()
+    id: studentId,
+    name: student.getStudentRecord(studentId).name,
+    assignments: grade.getStudentClasswork(studentId)
   });
 });
 
@@ -69,13 +69,12 @@ router.get('/:studentId([0-9]{6})/assignments', (req, res) => {
  * @param {number}  runId       The report card run or Marking Period.
  */
 router.get('/:studentId([0-9]{6})/assignments/:runId([0-9]{1})?', (req, res) => {
-  const student = new Students(req.params.studentId);
-  const grades = new Grades(req.params.studentId);
+  const { studentId } = req.params;
 
   res.status(200).json({
-    id: req.params.studentId,
-    name: student.getStudentRecord().name,
-    assignments: grades.getStudentClassworkPeriod(req.params.runId)
+    id: studentId,
+    name: student.getStudentRecord(studentId).name,
+    assignments: grade.getStudentClassworkPeriod(studentId, req.params.runId)
   });
 });
 
@@ -86,14 +85,13 @@ router.get('/:studentId([0-9]{6})/assignments/:runId([0-9]{1})?', (req, res) => 
  * @param {number}  runId       The report card run or Marking Period.
  */
 router.get('/:studentId([0-9]{6})/grades/:runId([0-9]{1})?', (req, res) => {
-  const student = new Students(req.params.studentId);
-  const grades = new Grades(req.params.studentId);
+  const { studentId } = req.params;
 
   res.status(200).json({
-    id: req.params.studentId,
-    name: student.getStudentRecord().name,
-    course_grades: grades.getStudentClassworkGrades(req.params.runId),
-    grades_snapshot_url: `${rootUrl}/${req.params.studentId}/grades/snapshot/${req.params.runId}`
+    id: studentId,
+    name: student.getStudentRecord(studentId).name,
+    course_grades: grade.getStudentClassworkGrades(studentId, req.params.runId),
+    grades_snapshot_url: `${rootUrl}/${studentId}/grades/snapshot/${req.params.runId}`
   });
 });
 
@@ -104,13 +102,12 @@ router.get('/:studentId([0-9]{6})/grades/:runId([0-9]{1})?', (req, res) => {
  * @param {number}  runId       The marking period. Default is current period.
  */
 router.get('/:studentId([0-9]{6})/grades/snapshot/:runId([0-9]{1})?', (req, res) => {
-  const student = new Students(req.params.studentId);
-  const grades = new Grades(req.params.studentId);
+  const { studentId } = req.params;
 
   res.status(200).json({
-    id: req.params.studentId,
-    name: student.getStudentRecord().name,
-    course_grade_average: grades.getStudentClassworkGradesAverage(req.params.runId)
+    id: studentId,
+    name: student.getStudentRecord(studentId).name,
+    course_grade_average: grade.getStudentClassworkGradesAverage(studentId, req.params.runId)
   });
 });
 

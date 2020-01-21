@@ -1,31 +1,26 @@
 const classworkData = require('../data/classwork.json');
 const intervalData = require('../data/intervals.json');
-const Courses = require('./courses');
+const course = require('./course');
 
-class Grades {
+const grade = {
   /**
+   * Gets the raw student classwork data.
+   *
    * @param  {number}  studentId  The student identifier
+   * @return {object}  The raw student classwork data.
    */
-  constructor(studentId) {
-    this.studentId = studentId;
-  }
+  getStudentClassworkData: (studentId) => {
+    return classworkData[studentId] ? classworkData[studentId].classwork : {};
+  },
 
   /**
-   * Gets all student classwork directly from fetched data.
+   * Gets the student classwork data.
    *
-   * @return {object}  All student classwork.
+   * @param  {number}  studentId  The student identifier
+   * @return {object}  The student classwork with enhancements.
    */
-  getStudentClassworkData() {
-    return classworkData[this.studentId] ? classworkData[this.studentId].classwork : {};
-  }
-
-  /**
-   * Gets student classwork.
-   *
-   * @return {object}  All student classwork with enhancements.
-   */
-  getStudentClasswork() {
-    const allStudentClasswork = this.getStudentClassworkData();
+  getStudentClasswork: (studentId) => {
+    const allStudentClasswork = grade.getStudentClassworkData(studentId);
 
     const stuff = allStudentClasswork.map((work) => {
       const newWork = work;
@@ -34,41 +29,41 @@ class Grades {
       newWork.courseId = work.course.substring(0, 9).trim();
 
       // Get matching course using first 9 chars of classwork course info.
-      const course = new Courses(newWork.courseId);
-
-      newWork.catWeight = course.getCourse().category[work.category];
+      newWork.catWeight = course.getCourse(newWork.courseId).category[work.category];
 
       return newWork;
     });
 
     return stuff;
-  }
+  },
 
   /**
    * Gets a student's classwork for specific Marking Period (report card run).
    *
-   * @param  {number}  [runId]  The run identifier (Marking Period)
-   * @return {object}  The classwork within a Marking Period range.
+   * @param  {number}  studentId                        The student identifier
+   * @param  {number}  [runId=grade.getRunIdForDate()]  The run identifier
+   * @return {object}  The student classwork data object for period.
    */
-  getStudentClassworkPeriod(runId = this.constructor.getRunIdForDate()) {
-    const runDateInMs = this.constructor.getRunDateInMs(runId);
+  getStudentClassworkPeriod: (studentId, runId = grade.getRunIdForDate()) => {
+    const runDateInMs = grade.getRunDateInMs(runId);
 
-    return this.getStudentClasswork().filter((work) => {
+    return grade.getStudentClasswork(studentId).filter((work) => {
       // Use only classwork in the Marking Period range
       return work.dateDueMs > runDateInMs.start && work.dateDueMs < runDateInMs.end;
     });
-  }
+  },
 
   /**
    * Gets grades for classwork grouped into course and category.
    *
-   * @param  {number}  [runId]  The run identifier (Marking Period)
-   * @return {object}  The grade snapshot.
+   * @param  {number}  studentId                        The student identifier
+   * @param  {number}  [runId=grade.getRunIdForDate()]  The run identifier
+   * @return {object}  The student classwork grades data.
    */
-  getStudentClassworkGrades(runId = this.constructor.getRunIdForDate()) {
+  getStudentClassworkGrades: (studentId, runId = grade.getRunIdForDate()) => {
     const classwork = {};
 
-    this.getStudentClassworkPeriod(runId).forEach((work) => {
+    grade.getStudentClassworkPeriod(studentId, runId).forEach((work) => {
       if (work.score !== '') {
         classwork[work.courseId] = classwork[work.courseId] || {};
         classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
@@ -77,18 +72,19 @@ class Grades {
     });
 
     return classwork;
-  }
+  },
 
   /**
    * Gets weighted grades for classwork grouped into course and category.
    *
-   * @param  {number}  [runId]  The run identifier
-   * @return {object}  The grade snapshot.
+   * @param  {number}  studentId                        The student identifier
+   * @param  {number}  [runId=grade.getRunIdForDate()]  The run identifier
+   * @return {object}  The student classwork grades data weighted.
    */
-  getStudentClassworkGradesWeighted(runId = this.constructor.getRunIdForDate()) {
+  getStudentClassworkGradesWeighted: (studentId, runId = grade.getRunIdForDate()) => {
     const classwork = {};
 
-    this.getStudentClassworkPeriod(runId).forEach((work) => {
+    grade.getStudentClassworkPeriod(studentId, runId).forEach((work) => {
       if (work.score !== '') {
         classwork[work.courseId] = classwork[work.courseId] || {};
         classwork[work.courseId][work.category] = classwork[work.courseId][work.category] || [];
@@ -97,16 +93,17 @@ class Grades {
     });
 
     return classwork;
-  }
+  },
 
   /**
    * Gets the grade average for classwork in the Marked Period.
    *
-   * @param  {number}  [runId]  The run identifier
-   * @return {object}  The grade snapshot.
+   * @param  {number}  studentId                        The student identifier
+   * @param  {number}  [runId=grade.getRunIdForDate()]  The run identifier
+   * @return {object}  The student classwork grades average grade data.
    */
-  getStudentClassworkGradesAverage(runId = this.constructor.getRunIdForDate()) {
-    const classwork = this.getStudentClassworkGradesWeighted(runId);
+  getStudentClassworkGradesAverage: (studentId, runId = grade.getRunIdForDate()) => {
+    const classwork = grade.getStudentClassworkGradesWeighted(studentId, runId);
     const courseAverageGrade = {};
 
     Object.keys(classwork).map((cId) => {
@@ -116,7 +113,7 @@ class Grades {
       // As we loop thru the results, remove active categories.
       // Subtract the weights of the inactive categories from 1.
       // Then divide the course totals by this weight adjustment.
-      const courseData = new Courses(cId).getCourse().category;
+      const courseData = course.getCourse(cId).category;
       const courseCatClone = { ...courseData };
 
       const courseTotal = Object.keys(courseClasswork).reduce((courseTotalAcc, cat) => {
@@ -143,15 +140,15 @@ class Grades {
     });
 
     return courseAverageGrade;
-  }
+  },
 
   /**
-   * Gets the run identifier for a date.
+   * Gets the run identifier for date.
    *
-   * @param  {string}  [targetDate]  The target date. Default is today.
-   * @return {number}  The current run identifier.
+   * @param  {object||string}  [targetDate=new Date()]  The target date
+   * @return {number}  The run identifier for date.
    */
-  static getRunIdForDate(targetDate = new Date()) {
+  getRunIdForDate: (targetDate = new Date()) => {
     return intervalData.findIndex((runEnd, idx) => {
       const prevRunEnd = intervalData[idx - 1];
 
@@ -163,7 +160,7 @@ class Grades {
 
       return target > start && target < end;
     });
-  }
+  },
 
   /**
    * Gets the run date in milliseconds.
@@ -171,7 +168,7 @@ class Grades {
    * @param  {number}  [runId]  The run identifier
    * @return {object}  The run date in milliseconds.
    */
-  static getRunDateInMs(runId = this.constructor.getRunIdForDate()) {
+  getRunDateInMs: (runId = grade.getRunIdForDate()) => {
     const prevRunEnd = intervalData[runId - 1];
 
     if (prevRunEnd === undefined) return false;
@@ -183,6 +180,6 @@ class Grades {
       end: convertToMs(intervalData[runId])
     };
   }
-}
+};
 
-module.exports = Grades;
+module.exports = grade;
