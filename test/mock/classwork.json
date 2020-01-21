@@ -20,6 +20,15 @@
         "category": "Daily",
         "score": "75.00",
         "comment": "Late Work"
+      },
+      {
+        "dateDue": "09/01/2019",
+        "dateAssign": "09/01/2019",
+        "course": "4567 - 1 Writing",
+        "assignment": "Fun Essay",
+        "category": "Daily",
+        "score": "90.00",
+        "comment": ""
       }
     ]
   }

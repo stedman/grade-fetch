@@ -41,7 +41,7 @@ router.get('/:studentId([0-9]{6})', (req, res) => {
   res.status(200).json({
     id: studentId,
     name: student.getStudentRecord(studentId).name,
-    assignments_url: `${rootUrl}/${studentId}/assignments{/rundId}`,
+    assignments_url: `${rootUrl}/${studentId}/assignments{/runId}`,
     grades_url: `${rootUrl}/${studentId}/grades{/runId}`,
     grades_snapshot_url: `${rootUrl}/${studentId}/grades/snapshot{/runId}`
   });

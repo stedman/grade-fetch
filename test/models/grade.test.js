@@ -5,6 +5,7 @@ jest.mock('../../data/classwork.json', () => require('../mock/classwork.json'));
 jest.mock('../../data/course.json', () => require('../mock/course.json'));
 
 const studentId = 123456;
+const runId = 3;
 
 describe('/models/grades/', () => {
   describe('getStudentClassworkData()', () => {
@@ -27,16 +28,19 @@ describe('/models/grades/', () => {
   });
 
   describe('getStudentClassworkPeriod()', () => {
+    // Grab a subset of the mock data that would fit into the test Marking Period.
+    const classwork = rawMockData[studentId].classwork.filter((task) => {
+      return task.dateDue === '12/19/2019';
+    });
+
     test('should return classwork for specific Marking Period (report card run)', () => {
-      expect(grade.getStudentClassworkPeriod(studentId, 3)).toMatchObject(
-        rawMockData[studentId].classwork
-      );
+      expect(grade.getStudentClassworkPeriod(studentId, runId)).toMatchObject(classwork);
     });
   });
 
   describe('getStudentClassworkGrades()', () => {
     test('should return grades for classwork grouped into course and category', () => {
-      expect(grade.getStudentClassworkGrades(studentId, 3)).toMatchObject({
+      expect(grade.getStudentClassworkGrades(studentId, runId)).toMatchObject({
         '0123 - 1': { Assessment: [95], Daily: [75] }
       });
     });
@@ -44,7 +48,7 @@ describe('/models/grades/', () => {
 
   describe('getStudentClassworkGradesWeighted()', () => {
     test('should return weighted grades for classwork grouped into course and category', () => {
-      expect(grade.getStudentClassworkGradesWeighted(studentId, 3)).toMatchObject({
+      expect(grade.getStudentClassworkGradesWeighted(studentId, runId)).toMatchObject({
         '0123 - 1': { Assessment: [47.5], Daily: [37.5] }
       });
     });
@@ -52,7 +56,7 @@ describe('/models/grades/', () => {
 
   describe('getStudentClassworkGradesAverage()', () => {
     test('should return grade average for classwork in the Marked Period', () => {
-      expect(grade.getStudentClassworkGradesAverage(studentId, 3)).toMatchObject({
+      expect(grade.getStudentClassworkGradesAverage(studentId, runId)).toMatchObject({
         '0123 - 1': '85.00'
       });
     });
