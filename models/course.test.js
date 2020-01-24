@@ -1,7 +1,7 @@
-const courses = require('../../models/course');
-const rawMockData = require('../mock/course.json');
+const courses = require('./course');
+const rawMockData = require('../data/mock/course.json');
 
-jest.mock('../../data/course.json', () => require('../mock/course.json'));
+jest.mock('../data/course.json', () => require('../data/mock/course.json'));
 
 const courseId = '0123 - 1';
 

@@ -3,15 +3,15 @@ const app = require('../../app');
 
 const routePrefix = '/api/v1/students';
 
-jest.mock('../../data/classwork.json', () => require('../mock/classwork.json'));
-jest.mock('../../data/course.json', () => require('../mock/course.json'));
-jest.mock('../../data/student.json', () => require('../mock/student.json'));
+jest.mock('../../data/classwork.json', () => require('../../data/mock/classwork.json'));
+jest.mock('../../data/course.json', () => require('../../data/mock/course.json'));
+jest.mock('../../data/student.json', () => require('../../data/mock/student.json'));
 
 const studentId = 123456;
 const runId = 3;
-const classworkData = require('../mock/classwork.json');
-const courseGradesData = require('../mock/courseGrades.json');
-const courseGradesAverageData = require('../mock/courseGradesAverage.json');
+const classworkData = require('../../data/mock/classwork.json');
+const courseGradesData = require('../../data/mock/courseGrades.json');
+const courseGradesAverageData = require('../../data/mock/courseGradesAverage.json');
 
 const classwork = classworkData[studentId].classwork[0];
 

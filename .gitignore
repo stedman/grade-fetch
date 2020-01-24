@@ -9,5 +9,6 @@
 # App-generated
 #--------------------#
 config/.secrets.js
-data
+data/*
+!data/mock
 node_modules

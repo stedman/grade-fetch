@@ -1,7 +1,7 @@
-const student = require('../../models/student');
-const rawMockData = require('../mock/student.json');
+const student = require('./student');
+const rawMockData = require('../data/mock/student.json');
 
-jest.mock('../../data/student.json', () => require('../mock/student.json'));
+jest.mock('../data/student.json', () => require('../data/mock/student.json'));
 
 const studentId = '123456';
 

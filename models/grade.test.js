@@ -1,8 +1,8 @@
-const grade = require('../../models/grade');
-const rawMockData = require('../mock/classwork.json');
+const grade = require('./grade');
+const rawMockData = require('../data/mock/classwork.json');
 
-jest.mock('../../data/classwork.json', () => require('../mock/classwork.json'));
-jest.mock('../../data/course.json', () => require('../mock/course.json'));
+jest.mock('../data/classwork.json', () => require('../data/mock/classwork.json'));
+jest.mock('../data/course.json', () => require('../data/mock/course.json'));
 
 const studentId = 123456;
 const runId = 3;
