@@ -38,6 +38,40 @@ const grade = {
   },
 
   /**
+   * Gets the student classwork data.
+   * Formatted for GraphQL.
+   *
+   * @param  {number}  studentId  The student identifier
+   * @return {object}  The student classwork with enhancements.
+   */
+  getStudentClassworkGql: (studentId) => {
+    const allStudentClasswork = grade.getStudentClassworkData(studentId);
+
+    const stuff = allStudentClasswork.map((work) => {
+      const courseId = work.course.substring(0, 9).trim();
+      // Adjust score and comment if score is 'M' (which won't calculate)
+      const adjusted =
+        work.score === 'M'
+          ? { score: 0, comment: `[missing work] ${work.comment}` }
+          : { score: work.score, comment: work.comment };
+
+      return {
+        due: work.dateDue,
+        dueMs: new Date(work.dateDue).getTime(),
+        courseId,
+        description: work.assignment,
+        category: work.category,
+        score: adjusted.score,
+        // Get matching course using first 9 chars of classwork course info.
+        catWeight: course.getCourse(courseId).category[work.category],
+        comment: adjusted.comment.trim()
+      };
+    });
+
+    return stuff;
+  },
+
+  /**
    * Gets a student's classwork for specific Marking Period (report card run).
    *
    * @param  {number}  studentId                        The student identifier
@@ -50,6 +84,23 @@ const grade = {
     return grade.getStudentClasswork(studentId).filter((work) => {
       // Use only classwork in the Marking Period range
       return work.dateDueMs > runDateInMs.start && work.dateDueMs < runDateInMs.end;
+    });
+  },
+
+  /**
+   * Gets a student's classwork for specific Marking Period (report card run).
+   * Formatted for GraphQL.
+   *
+   * @param  {number}  studentId                        The student identifier
+   * @param  {number}  [runId=grade.getRunIdForDate()]  The run identifier
+   * @return {object}  The student classwork data object for period.
+   */
+  getStudentClassworkPeriodGql: (studentId, runId = grade.getRunIdForDate()) => {
+    const runDateInMs = grade.getRunDateInMs(runId);
+
+    return grade.getStudentClassworkGql(studentId).filter((work) => {
+      // Use only classwork in the Marking Period range
+      return work.dueMs > runDateInMs.start && work.dueMs < runDateInMs.end;
     });
   },
 
@@ -106,7 +157,7 @@ const grade = {
     const classwork = grade.getStudentClassworkGradesWeighted(studentId, runId);
     const courseAverageGrade = {};
 
-    Object.keys(classwork).map((cId) => {
+    Object.keys(classwork).forEach((cId) => {
       const courseClasswork = classwork[cId];
 
       // Get all possible course categories.
@@ -140,6 +191,26 @@ const grade = {
     });
 
     return courseAverageGrade;
+  },
+
+
+  /**
+   * Gets the grade average for classwork in the Marked Period.
+   * Formatted for GraphQL.
+   *
+   * @param  {number}  studentId                        The student identifier
+   * @param  {number}  [runId=grade.getRunIdForDate()]  The run identifier
+   * @return {object}  The student classwork grades average grade data.
+   */
+  getStudentClassworkGradesAverageGql: (studentId, runId = grade.getRunIdForDate()) => {
+    const gradesAverage = grade.getStudentClassworkGradesAverage(studentId, runId);
+
+    return Object.entries(gradesAverage).map(([cId, avg]) => {
+      return {
+        courseId: cId,
+        average: avg
+      };
+    });
   },
 
   /**

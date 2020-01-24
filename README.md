@@ -1,4 +1,6 @@
-# Grade Fetch
+# Student Data
+
+> **WIP**: WORK IN PROGRESS
 
 ## Overview
 
@@ -29,15 +31,21 @@ I chose to keep the app together and in one repo for the time being for convenie
 4. [x] Set up test framework.
    1. [x] Add [Jest](https://jestjs.io).
    2. [x] Add initial tests.
-5. [ ] Migrate REST API to GraphQL.
-6. [ ] Add "view" framework.
-   1. [ ] Add [Vue](https://nuxtjs.org).
-   2. [ ] Add [charts](https://madewithvuejs.com/charts).
+5. [x] Add
+   1. [x] Add [GraphQL](https://graphql.org/graphql-js/express-graphql/).
+   2. [x] Add rudimentary schema and root values.
+6. [x] Add "view" framework. *
+   1. [x] Add [Vue](https://nuxtjs.org).
+   2. [x] Add [charts](https://madewithvuejs.com/charts).
 7. [ ] Migrate data from flat file to database.
    1. [ ] Add [MongoDB](https://mongodb.com) and [Mongoose]([https://](https://mongoosejs.com)).
    2. [ ] Migrate models from using flat files to using Mongoose.
 8. [ ] Add authentication.
-9. [ ] Migrate from local app to cloud.
+9.  [ ] Migrate from local app to cloud.
+
+#### NOTES
+
+* I set up Nuxt and Vue-Charts on another repo to keep things orderly. I will update with more details here shortly.
 
 #### Additional considerations for Roadmap
 
