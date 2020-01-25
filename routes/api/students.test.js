@@ -15,7 +15,7 @@ const courseGradesAverageData = require('../../data/mock/courseGradesAverage.jso
 
 const classwork = classworkData[studentId].classwork[0];
 
-describe('/routes/students', () => {
+describe('/routes/api/students.js', () => {
   describe('GET /', () => {
     test('should GET all student records', async () => {
       const response = await request(app).get(`${routePrefix}/`);
@@ -27,7 +27,7 @@ describe('/routes/students', () => {
       const response = await request(app).get(`${routePrefix}/unknown_endpoint`);
 
       // TODO: revisit unhappy paths and assign proper status codes: https://httpstatuses.com/
-      expect(response.statusCode).toEqual(404);
+      expect(response.statusCode).toEqual(400);
     });
   });
 
