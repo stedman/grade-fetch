@@ -8,9 +8,9 @@ This started out as a simple application to automatically retrieve grades from m
 
 ### Hey, there's an app in here
 
-Now I could have gone down the path of building a better spreadsheet importer, but that wouldn't have been the *Web Developer Way™*. These analysis and visualization tools need to be made into a modern app.
+Now I could have gone down the path of building a better spreadsheet importer, but that wouldn't have been the *Web Developer Way™*. These analysis and visualization tools are just begging to be made into a modern application.
 
-I initially wanted to keep the app together in one repo for convenience sake. However, as I started looking into Nuxt, Next, et al, it seemed to make sense to keep those presentation layers completely separate to toy with implementation details.
+I initially wanted to keep the app together in a monorepo for convenience sake (e.g., shared packages, synced releases). However, as I started looking into [Nuxt](https://nuxtstack.org/), [Next](https://nextjs.org/), et al, it seemed to make sense to keep those presentation layers completely separate to toy with implementation details.
 
 So what we have now is a data application (student-data) responsible for collecting and sharing data and we will have at least one additional application for presenting the data (student-dash).
 
@@ -20,9 +20,17 @@ The following Roadmap continues to be provisional and will like change as time g
 
 1. [x] Set up environment
    1. [x] Node (v12) + npm
-   2. [x] Add [.editorconfig](https://editorconfig.org).
-   3. [x] Install [ESLint](https://eslint.org).
-   4. [x] Install [Prettier](https://prettier.io).
+      * Node is an obvious starting point and v12 is the latest [LTS (long-term support) release](https://nodejs.org/en/about/releases/).
+      * While I personally use [nvm](https://github.com/nvm-sh/nvm) to manage Node versions, that use is optional here.
+      * [npm](https://www.npmjs.com/) is Node's baked-in package manager and does its job pretty well. [Yarn](https://yarnpkg.com/) is a solid alternative.
+   2. Automate code formatting and static analysis.
+      1. [x] Add [.editorconfig](https://editorconfig.org).
+         * EditorConfig is a basic, universal code-style enforcer. Provided the IDE/editor can read the config file straight out of the box or with a plugin, EditorConfig is a great first step. It essentially gives the IDE/editor a set of rules to follow for indentions, line-endings, etc.
+      2. [x] Install [ESLint](https://eslint.org).
+         * Whether you're working on a team or alone, ESLint will change your life. Set a standard and let the robots do the dirty work of checking and fixing your code. Free your mind to solve bigger problems than syntax errors, unused variables, and tab spaces.
+         * Configuring [ESLint rules](https://eslint.org/docs/rules/) is the most important step. While there are several options out there, the [Airbnb config](https://www.npmjs.com/package/eslint-config-airbnb) remains one of the most ubiquitous and practical to use. The rules are reasonable, are very [well-documented](https://github.com/airbnb/javascript), and can be easily overrided locally.
+      3. [x] Install [Prettier](https://prettier.io).
+         * Prettier is the newest player here and takes code formatting one extra step. Its basic rules are applied upon save to reformat indents, line length, quotation marks, etc.
 2. [x] Scrape student information from school website.
    1. [x] Install [Puppeteer](https://pptr.dev/).
    2. [x] Set up DOM selectors to capture page data.
@@ -31,8 +39,8 @@ The following Roadmap continues to be provisional and will like change as time g
 3. [ ] Create REST API to save scraped data and retrieve for visualization.
    1. [x] Install [Express](https://expressjs.com) web framework.
    2. [x] Add rudimentary models and routes for data retrieval.
-   3. [ ] Add models and routes for data saves.
-   4. [ ] Migrate captured data saves to use API.
+   3. [ ] Add models and routes for data mutations: create, update, and delete.
+   4. [ ] Migrate captured data mutations to use API.
 4. [x] Set up test framework.
    1. [x] Install [Jest](https://jestjs.io).
    2. [x] Add initial tests.
@@ -50,23 +58,23 @@ The following Roadmap continues to be provisional and will like change as time g
 
 #### Additional considerations for Roadmap
 
-* Use Docker containers.
+* Migrate to ECMAScript Modules (ESM). If [Node 12+ ESM implementation](https://nodejs.org/docs/latest-v12.x/api/esm.html) doesn't work, add [Babel](https://babeljs.io) as a dependency?
 * Migrate to [Typescript](https://www.typescriptlang.org) for its type checking, autocompletion in VSCode, and because it's the latest hotness.
-* Migrate to ES6 modules. Node 12+ supports the new format, but my initial tests failed. Add [Babel](https://babeljs.io)?
 * Create a [ReactJS](https://reactjs.org) version of the presentation dashboard?
+* Use Docker containers.
 
 ---
 
 ## Install
 
 ```sh
-yarn install
+npm install
 ```
 
 ## Run
 
 ```sh
-yarn start
+npm start
 ```
 
 ### Scrape
@@ -78,7 +86,7 @@ node rrisd
 ## Test
 
 ```sh
-yarn test
+npm test
 ```
 
 ## Helpful resources
