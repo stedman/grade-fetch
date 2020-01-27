@@ -25,9 +25,18 @@ const grade = {
     const stuff = allStudentClasswork.map((work) => {
       const newWork = work;
 
+      // Adjust score and comment if score is 'M' (which won't calculate)
+      const adjusted =
+        work.score === 'M'
+          ? { score: 0, comment: `[missing work] ${work.comment}` }
+          : { score: work.score, comment: work.comment };
+
+      newWork.score = adjusted.score;
+      newWork.comment = adjusted.comment.trim();
+
+      // Add new properties with enhanced data.
       newWork.dateDueMs = new Date(work.dateDue).getTime();
       newWork.courseId = work.course.substring(0, 9).trim();
-
       // Get matching course using first 9 chars of classwork course info.
       newWork.catWeight = course.getCourse(newWork.courseId).category[work.category];
 
@@ -192,7 +201,6 @@ const grade = {
 
     return courseAverageGrade;
   },
-
 
   /**
    * Gets the grade average for classwork in the Marked Period.

@@ -29,6 +29,15 @@
         "category": "Daily",
         "score": "90.00",
         "comment": ""
+      },
+      {
+        "dateDue": "08/30/2019",
+        "dateAssign": "08/30/2019",
+        "course": "0123 - 1 Reading",
+        "assignment": "Easy homework",
+        "category": "Daily",
+        "score": "M",
+        "comment": ""
       }
     ]
   }

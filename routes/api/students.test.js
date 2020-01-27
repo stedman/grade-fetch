@@ -51,7 +51,7 @@ describe('/routes/api/students.js', () => {
       const response = await request(app).get(`${routePrefix}/${studentId}/assignments`);
 
       expect(response.statusCode).toEqual(200);
-      expect(response.body.assignments.length).toEqual(3);
+      expect(response.body.assignments.length).toEqual(4);
       expect(response.body.assignments[0]).toMatchObject(classwork);
     });
   });
