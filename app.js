@@ -8,6 +8,12 @@ const apiRouteStudents = require('./routes/api/students');
 
 const app = express();
 
+// CORS setting
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
+
 // GraphQL
 app.use(
   '/graphql',
