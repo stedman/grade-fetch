@@ -125,7 +125,7 @@ router.get('/:studentId/grades/snapshot/:runId?', (req, res) => {
     res.status(200).json({
       id: studentId,
       name: student.getStudentRecord(studentId).name,
-      course_grade_average: grade.getStudentClassworkGradesAverage(studentId, validRunId)
+      course_grade_average: grade.getStudentClassworkGradesAverageGql(studentId, validRunId)
     });
   } else {
     res.status(400).send('Bad Request');

@@ -208,7 +208,7 @@ const grade = {
    *
    * @param  {number}  studentId                        The student identifier
    * @param  {number}  [runId=grade.getRunIdForDate()]  The run identifier
-   * @return {object}  The student classwork grades average grade data.
+   * @return {array}  The student classwork grades average grade data.
    */
   getStudentClassworkGradesAverageGql: (studentId, runId = grade.getRunIdForDate()) => {
     const gradesAverage = grade.getStudentClassworkGradesAverage(studentId, runId);
@@ -216,6 +216,7 @@ const grade = {
     return Object.entries(gradesAverage).map(([cId, avg]) => {
       return {
         courseId: cId,
+        courseName: course.getCourse(cId).name,
         average: avg
       };
     });

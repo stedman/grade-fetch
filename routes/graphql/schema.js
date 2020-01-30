@@ -19,6 +19,7 @@ const schema = buildSchema(`
   },
   type Grade {
     courseId: String,
+    courseName: String,
     average: String
   },
   type Query {
