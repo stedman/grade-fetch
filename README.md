@@ -28,12 +28,12 @@ In addition to Puppeteer, the data sub-project uses a tech stack that should be 
 
 ### Roadmap
 
-The following Roadmap continues to be provisional and will like change as time goes on:
+The following Roadmap continues to be provisional and will likely change as time goes on:
 
 1. Set up environment
     1. [x] Node (v12) + npm
         * Node is an obvious starting point and v12 is the latest [LTS (long-term support) release](https://nodejs.org/en/about/releases/).
-        * While I personally use [nvm](https://github.com/nvm-sh/nvm) to manage Node versions, that use is optional here.
+        * I recommend [nvm](https://github.com/nvm-sh/nvm) to manage Node versions, but it is optional here.
         * [npm](https://www.npmjs.com/) is Node's baked-in package manager and does its job pretty well. [Yarn](https://yarnpkg.com/) is a solid alternative.
     2. Automate code formatting and static analysis.
         1. [x] Add [.editorconfig](https://editorconfig.org).
@@ -69,8 +69,8 @@ The following Roadmap continues to be provisional and will like change as time g
 6. Formalize REST API into OpenAPI spec.
     1. [ ] Create schema.yaml.
         * tutorial ref: https://idratherbewriting.com/learnapidoc/pubapis_openapi_step1_openapi_object.html
-    2. [ ] Install express-openapi.
-    3. [ ] Install express-openapi-validator.
+    2. [ ] Install [express-openapi](https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi).
+    3. [ ] Install [express-openapi-validator](https://github.com/cdimascio/express-openapi-validator).
 7. Add presentation dashboard.
     1. [x] Install [Nuxt/Vue](https://nuxtjs.org).
     2. [x] Install [vue-charts](https://vue-chartjs.org/).
@@ -78,9 +78,9 @@ The following Roadmap continues to be provisional and will like change as time g
     1. [ ] Install [MongoDB](https://mongodb.com) and [Mongoose]([https://](https://mongoosejs.com)).
     2. [ ] Migrate models from using flat files to using Mongoose.
 9.  Add authentication.
-    1. [ ] TODO
+    1. [ ] // TODO: add express authentication
 10. Migrate from local app to cloud.
-    1. [ ] TODO
+    1. [ ] // TODO: migrate to cloud
 
 #### Additional considerations for Roadmap
 
