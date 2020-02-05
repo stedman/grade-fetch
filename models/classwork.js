@@ -34,17 +34,19 @@ const classwork = {
         work.score === 'M'
           ? { score: 0, comment: `[missing work] ${work.comment}` }
           : { score: work.score, comment: work.comment };
+      const courseData = course.getCourse(courseId);
 
       return {
         due: work.dateDue,
         dueMs: new Date(work.dateDue).getTime(),
         assigned: work.dateAssign,
         courseId,
+        courseName: courseData.name,
         assignment: work.assignment,
         category: work.category,
         score: adjusted.score,
         // Get matching course using first 9 chars of classwork course info.
-        catWeight: course.getCourse(courseId).category[work.category],
+        catWeight: courseData.category[work.category],
         comment: adjusted.comment.trim()
       };
     });
@@ -81,8 +83,8 @@ const classwork = {
     return classwork.getClassworkForRun(studentId, runId).reduce((acc, work) => {
       if (work.comment !== '') {
         acc.push({
-          date: work.dateDue,
-          course: work.course,
+          date: work.due,
+          course: work.courseName,
           assignment: work.assignment,
           score: work.score,
           comment: work.comment
