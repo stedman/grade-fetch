@@ -1,0 +1,257 @@
+openapi: 3.0.0
+info:
+  title: OpenStudent
+  version: "1.0"
+servers:
+  - url: "http://localhost:3001"
+    description: DEV server
+paths:
+  /students:
+    get:
+      summary: Get all student records
+      tags: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: student identifier
+                  name:
+                    type: string
+                    description: student full name
+                  grade:
+                    type: string
+                    description: current grade level
+                  school:
+                    type: string
+                    description: current school name
+                  student_url:
+                    type: string
+                    description: link to student detail
+                required:
+                  - id
+                  - name
+                  - grade
+                  - school
+                  - student_url
+        "400":
+          description: Bad Request
+      operationId: get-students
+      requestBody: {}
+  "/students/{id}":
+    parameters:
+      - schema:
+          type: string
+        name: id
+        description: student identifier
+        in: path
+        required: true
+    get:
+      summary: Get individual student record
+      tags: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: student identifier
+                  name:
+                    type: string
+                    description: student full name
+                  grade:
+                    type: string
+                    description: current grade level
+                  school:
+                    type: string
+                    description: current school name
+                  assignments_url:
+                    type: string
+                    description: link to student assignments
+                  grades_url:
+                    type: string
+                    description: link to student grades
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+      operationId: get-student-id
+  "/students/{id}/classwork":
+    parameters:
+      - schema:
+          type: string
+        name: id
+        description: student identifier
+        in: path
+        required: true
+    get:
+      summary: Get student classwork records
+      tags: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: student identifier
+                  classwork:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/classwork"
+        "400":
+          description: Bad Request
+      operationId: get-students-id-classwork
+      parameters:
+        - schema:
+            type: integer
+            maximum: 6
+            minimum: 0
+          in: query
+          name: run
+          description: |-
+            marking period (run)
+            * valid int: `0`-`6`
+            * `0` retrieves all records
+      requestBody: {}
+      description: ""
+  "/students/{id}/grades":
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get student grades
+      tags: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: student identifier
+                  name:
+                    type: string
+                    description: student full name
+                  course_grades:
+                    type: object
+                    properties:
+                      "{courseId}":
+                        type: object
+                        description: course identifier (as key)
+                        properties:
+                          "{category}":
+                            type: array
+                            description: category name (as key)
+                            items:
+                              type: number
+                              description: scores for assignments
+                  grades_average_url:
+                    type: string
+      operationId: get-students-id-grades
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: run
+  "/students/{id}/grades/average":
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get student grade averages
+      tags: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: student identifier
+                  name:
+                    type: string
+                    description: student full name
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        assignment:
+                          type: string
+                          description: description of assignment
+                        score:
+                          type: number
+                          description: score for assignment
+                        comment:
+                          type: string
+                          description: comment for assignment
+                  course_grade_average:
+                    type: object
+                    properties:
+                      courseId:
+                        type: string
+                        description: course identifier
+                      courseName:
+                        type: string
+                        description: course name
+                      average:
+                        type: number
+                        description: course average
+      operationId: get-students-id-grades-average
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: run
+components:
+  schemas:
+    classwork:
+      title: classwork
+      type: object
+      properties:
+        due:
+          type: string
+          description: date assignment was due
+        dueMs:
+          type: number
+          description: "date due, in milliseconds"
+        courseId:
+          type: string
+          description: course identifier
+        description:
+          type: string
+          description: description for assignment
+        score:
+          type: string
+          description: score for assignment
+        catWeight:
+          type: number
+          description: scoring weight for assignment category
+        comment:
+          type: string
+          description: comment on assignment
