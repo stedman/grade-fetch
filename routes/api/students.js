@@ -1,5 +1,7 @@
 const express = require('express');
+const utilities = require('../../lib/utilities');
 const student = require('../../models/student');
+const classwork = require('../../models/classwork');
 const grade = require('../../models/grade');
 
 const router = express.Router();
@@ -8,7 +10,7 @@ const rootUrl = 'http://localhost:3001/api/v1/students';
 // regex for studentId param format
 const reStudentId = /^\d{6}$/;
 // regex for runId param format
-const reRunId = /^\d{1}$/;
+const reRunId = /^[0-6]$/;
 
 router.use((req, res, next) => {
   // eslint-disable-next-line no-console
@@ -21,17 +23,29 @@ router.use((req, res, next) => {
  */
 router.get('/', (req, res) => {
   const students = student.getAllStudentRecords();
-  const studentRecords = [];
+  const schoolYear = utilities.getSchoolYear();
 
-  Object.keys(students).forEach((id) => {
-    studentRecords.push({
-      id,
-      name: students[id].name,
-      student_url: `${rootUrl}/${id}`
-    });
-  });
+  try {
+    const records = Object.keys(students).reduce((acc, id) => {
+      const studentData = students[id].year[schoolYear];
 
-  res.status(200).json(studentRecords);
+      acc.push({
+        id,
+        name: students[id].name,
+        grade: studentData.grade,
+        school: studentData.building,
+        student_url: `${rootUrl}/${id}`
+      });
+
+      return acc;
+    }, []);
+
+    res.status(200).json(records);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 /**
@@ -41,14 +55,17 @@ router.get('/', (req, res) => {
  */
 router.get('/:studentId', (req, res) => {
   const { studentId } = req.params;
+  const studentData = student.getStudentRecord(studentId);
 
   if (reStudentId.test(studentId)) {
     res.status(200).json({
       id: studentId,
-      name: student.getStudentRecord(studentId).name,
-      assignments_url: `${rootUrl}/${studentId}/assignments{/runId}`,
-      grades_url: `${rootUrl}/${studentId}/grades{/runId}`,
-      grades_snapshot_url: `${rootUrl}/${studentId}/grades/snapshot{/runId}`
+      name: studentData.name,
+      grade: studentData.grade,
+      school: studentData.building,
+      assignments_url: `${rootUrl}/${studentId}/assignments`,
+      grades_url: `${rootUrl}/${studentId}/grades`,
+      grades_average_url: `${rootUrl}/${studentId}/grades/average`
     });
   } else {
     res.status(400).send('Bad Request');
@@ -56,32 +73,22 @@ router.get('/:studentId', (req, res) => {
 });
 
 /**
- * Get student assignments.
+ * Get student classwork.
  *
  * @param {number}  studentId   The school-provided student identifier.
- * @param {number}  runId       The report card run or Marking Period.
+ * @query {number}  runId       The report card run or Marking Period.
  */
-router.get('/:studentId/assignments/:runId?', (req, res) => {
-  const { studentId, runId } = req.params;
+router.get('/:studentId/classwork', (req, res) => {
+  const { studentId } = req.params;
+  const runId = reRunId.test(req.query.run) ? req.query.run : undefined;
 
   if (reStudentId.test(studentId)) {
-    if (runId === undefined) {
-      // Get all student assignments
-      res.status(200).json({
-        id: studentId,
-        name: student.getStudentRecord(studentId).name,
-        assignments: grade.getStudentClasswork(studentId)
-      });
-    } else if (reRunId.test(runId)) {
-      // Get assignments for specific period
-      res.status(200).json({
-        id: studentId,
-        name: student.getStudentRecord(studentId).name,
-        assignments: grade.getStudentClassworkPeriod(studentId, runId)
-      });
-    } else {
-      res.status(400).send('Bad Request');
-    }
+    // Get assignments for most recent period, or specific run if provided
+    res.status(200).json({
+      id: studentId,
+      name: student.getStudentRecord(studentId).name,
+      assignments: classwork.getClassworkForRun(studentId, runId)
+    });
   } else {
     res.status(400).send('Bad Request');
   }
@@ -93,17 +100,16 @@ router.get('/:studentId/assignments/:runId?', (req, res) => {
  * @param {number}  studentId   The school-provided student identifier.
  * @param {number}  runId       The report card run or Marking Period.
  */
-router.get('/:studentId/grades/:runId?', (req, res) => {
-  const { studentId, runId } = req.params;
+router.get('/:studentId/grades', (req, res) => {
+  const { studentId } = req.params;
+  const runId = reRunId.test(req.query.run) ? req.query.run : undefined;
 
   if (reStudentId.test(studentId)) {
-    const validRunId = reRunId.test(runId) ? runId : undefined;
-
     res.status(200).json({
       id: studentId,
       name: student.getStudentRecord(studentId).name,
-      course_grades: grade.getStudentClassworkGrades(studentId, validRunId),
-      grades_snapshot_url: `${rootUrl}/${studentId}/grades/snapshot/${validRunId}`
+      course_grades: grade.getGrades(studentId, runId),
+      grades_average_url: `${rootUrl}/${studentId}/grades/average?run=${runId || ''}`
     });
   } else {
     res.status(400).send('Bad Request');
@@ -111,21 +117,21 @@ router.get('/:studentId/grades/:runId?', (req, res) => {
 });
 
 /**
- * Get student daily grade snapshot for specific Marking Period.
+ * Get student daily grade average for specific Marking Period.
  *
  * @param {number}  studentId   The school-provided student identifier.
  * @param {number}  runId       The marking period. Default is current period.
  */
-router.get('/:studentId/grades/snapshot/:runId?', (req, res) => {
-  const { studentId, runId } = req.params;
+router.get('/:studentId/grades/average', (req, res) => {
+  const { studentId } = req.params;
+  const runId = reRunId.test(req.query.run) ? req.query.run : undefined;
 
   if (reStudentId.test(studentId)) {
-    const validRunId = reRunId.test(runId) ? runId : undefined;
-
     res.status(200).json({
       id: studentId,
       name: student.getStudentRecord(studentId).name,
-      course_grade_average: grade.getStudentClassworkGradesAverageGql(studentId, validRunId)
+      comments: classwork.getClassworkComments(studentId, runId),
+      course_grade_average: grade.getGradesAverageGql(studentId, runId)
     });
   } else {
     res.status(400).send('Bad Request');

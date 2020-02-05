@@ -1,13 +1,13 @@
 {
   "123456": {
-    "name": "Dick Smothers",
-    "fullname": "Smothers, Dick",
+    "name": "Amber Lith",
+    "fullname": "Lith, Amber",
     "year": {
-      "06": {
+      "2020": {
         "building": "Big Middle School",
         "homeroom": {
           "room": "2135",
-          "teacher": "Knotts, Don"
+          "teacher": "Tickulate, Jess"
         },
         "courses": [
           "787 - 1",
@@ -23,14 +23,14 @@
     }
   },
   "234567": {
-    "name": "Jane Curtain",
-    "fullname": "Curtain, Jane",
+    "name": "Ruby Lith",
+    "fullname": "Lith, Ruby",
     "year": {
-      "03": {
+      "2020": {
         "building": "Big Elementary School",
         "homeroom": {
           "room": "1234",
-          "teacher": "Struthers, Sally"
+          "teacher": "Zone, Cal"
         },
         "courses": [
           "410 - 2",

@@ -7,7 +7,7 @@
   "license": "WTFPL",
   "scripts": {
     "lint": "eslint ./ --fix",
-    "scrape": "node lib/scrape/fetchRrisd.js",
+    "scrape": "node lib/rrisd/fetchAll.js",
     "start": "nodemon server.js",
     "test": "jest"
   },
