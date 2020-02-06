@@ -67,8 +67,12 @@ The following Roadmap continues to be provisional and will likely change as time
     1. [x] Install [GraphQL](https://graphql.org/graphql-js/express-graphql/).
     2. [x] Add rudimentary schema and root values.
 6. Formalize REST API into OpenAPI spec.
-    1. [ ] Create schema.yaml.
-        * tutorial ref: https://idratherbewriting.com/learnapidoc/pubapis_openapi_step1_openapi_object.html
+    1. [x] Create schema.yaml.
+        * Getting inspiration from the fantastic [Learn API Doc](https://idratherbewriting.com/learnapidoc/pubapis_openapi_step1_openapi_object.html) instructions, I cracked open [Stoplight Studio](https://stoplight.io/p/studio/) and started writing the OpenAPI schema for this project. The process was illuminating and helped me refactor the REST endpoints and even the data models. Although I believe I initially needed to build a straw man API to test several ideas, it's now time to pave the cowpaths via this schema building process.
+
+            The process of building a schema clarifies the intentions and purpose of the API. Defining paths, queries, descriptions, types, etc. forces a consideration each atomic piece and its relationship to the whole.
+
+            Further on down the road, I am hopeful that a solid spec and the OpenAPI validator will help preserve a working API even as this app evolves — much as unit tests do for code refactoring.
     2. [ ] Install [express-openapi](https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi).
     3. [ ] Install [express-openapi-validator](https://github.com/cdimascio/express-openapi-validator).
 7. Add presentation dashboard.
