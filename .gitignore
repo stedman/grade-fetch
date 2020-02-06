@@ -1,14 +1,14 @@
-# OS generated #
+# Operating System
 #--------------------#
 .DS_Store
 
-# IDE-generated
+# IDE
 #--------------------#
 .vscode
 
-# App-generated
+# Project
 #--------------------#
-config/.secrets.js
+.env
 data/*
 !data/mock
 node_modules

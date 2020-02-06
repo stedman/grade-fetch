@@ -101,6 +101,13 @@ The following Roadmap continues to be provisional and will likely change as time
 npm install
 ```
 
+Create a `.env` at the project root and add your Home Access login credentials:
+
+```sh
+RRISD_USERNAME=your_username
+RRISD_PASSWORD=your_password
+```
+
 ## Run
 
 ```sh
