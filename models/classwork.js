@@ -28,6 +28,7 @@ const classwork = {
     const rawClasswork = classwork.getClassworkRaw(studentId);
 
     return rawClasswork.map((work) => {
+      // Get matching course using first 9 chars of classwork course info.
       const courseId = work.course.substring(0, 9).trim();
       // Adjust score and comment if score is 'M' (which won't calculate)
       const adjusted =
@@ -35,6 +36,17 @@ const classwork = {
           ? { score: 0, comment: `[missing work] ${work.comment}` }
           : { score: work.score, comment: work.comment };
       const courseData = course.getCourse(courseId);
+
+      const catWeight = courseData.category[work.category];
+
+      if (catWeight === undefined) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `Category showed up in classwork, but is not a course category:
+          ${courseId} - ${work.category} - ${catWeight}`
+        );
+        throw new Error('Category showed up in classwork, but is not a course category.');
+      }
 
       return {
         due: work.dateDue,
@@ -45,8 +57,7 @@ const classwork = {
         assignment: work.assignment,
         category: work.category,
         score: adjusted.score,
-        // Get matching course using first 9 chars of classwork course info.
-        catWeight: courseData.category[work.category],
+        catWeight,
         comment: adjusted.comment.trim()
       };
     });

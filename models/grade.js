@@ -54,7 +54,7 @@ const grade = {
       const courseClasswork = weightedClasswork[cId];
 
       // Get all possible course categories.
-      // As we loop thru the results, remove active categories.
+      // As we loop thru the results, remove categories found in classwork.
       // Subtract the weights of the inactive categories from 1.
       // Then divide the course totals by this weight adjustment.
       const courseData = course.getCourse(cId).category;
