@@ -30,7 +30,7 @@ paths:
                   school:
                     type: string
                     description: current school name
-                  student_url:
+                  studentUrl:
                     type: string
                     description: link to student detail
                 required:
@@ -38,7 +38,7 @@ paths:
                   - name
                   - grade
                   - school
-                  - student_url
+                  - studentUrl
         "400":
           description: Bad Request
       operationId: get-students
@@ -74,10 +74,10 @@ paths:
                   school:
                     type: string
                     description: current school name
-                  assignments_url:
+                  classworkUrl:
                     type: string
-                    description: link to student assignments
-                  grades_url:
+                    description: link to student classwork
+                  gradesUrl:
                     type: string
                     description: link to student grades
         "201":
@@ -151,7 +151,7 @@ paths:
                   name:
                     type: string
                     description: student full name
-                  course_grades:
+                  courseGrades:
                     type: object
                     properties:
                       "{courseId}":
@@ -164,7 +164,7 @@ paths:
                             items:
                               type: number
                               description: scores for assignments
-                  grades_average_url:
+                  gradesAverageUrl:
                     type: string
       operationId: get-students-id-grades
       parameters:
@@ -210,7 +210,7 @@ paths:
                         comment:
                           type: string
                           description: comment for assignment
-                  course_grade_average:
+                  courseGradeAverage:
                     type: object
                     properties:
                       courseId:
