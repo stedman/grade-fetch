@@ -6,17 +6,16 @@ const grade = {
   /**
    * Gets grades for classwork grouped into course and category.
    *
-   * @param  {number}  studentId                        The student identifier
-   * @param  {number}  [runId=utilities.getRunIdForDate()]  The run identifier
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
    * @return {object}  The student classwork grades data.
    */
-  getGrades: (studentId, runId = utilities.getRunIdForDate()) => {
-    return classwork.getClassworkForRun(studentId, runId).reduce((acc, work) => {
-      if (work.score !== '') {
-        acc[work.courseId] = acc[work.courseId] || {};
-        acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
-        acc[work.courseId][work.category].push(Number(work.score));
-      }
+  getGrades: (studentId, mp = utilities.getMpForDate()) => {
+    return classwork.getScoredClassworkForMp(studentId, mp).reduce((acc, work) => {
+      acc[work.courseId] = acc[work.courseId] || {};
+      acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
+      acc[work.courseId][work.category].push(Number(work.score));
+
       return acc;
     }, {});
   },
@@ -24,17 +23,16 @@ const grade = {
   /**
    * Gets weighted grades for classwork grouped into course and category.
    *
-   * @param  {number}  studentId                        The student identifier
-   * @param  {number}  [runId=utilities.getRunIdForDate()]  The run identifier
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
    * @return {object}  The student classwork grades data weighted.
    */
-  getGradesWeighted: (studentId, runId = utilities.getRunIdForDate()) => {
-    return classwork.getClassworkForRun(studentId, runId).reduce((acc, work) => {
-      if (work.score !== '') {
-        acc[work.courseId] = acc[work.courseId] || {};
-        acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
-        acc[work.courseId][work.category].push(Number(work.score) * work.catWeight);
-      }
+  getGradesWeighted: (studentId, mp = utilities.getMpForDate()) => {
+    return classwork.getScoredClassworkForMp(studentId, mp).reduce((acc, work) => {
+      acc[work.courseId] = acc[work.courseId] || {};
+      acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
+      acc[work.courseId][work.category].push(Number(work.score) * work.catWeight);
+
       return acc;
     }, {});
   },
@@ -42,12 +40,12 @@ const grade = {
   /**
    * Gets the grade average for classwork in the Marked Period.
    *
-   * @param  {number}  studentId                        The student identifier
-   * @param  {number}  [runId=utilities.getRunIdForDate()]  The run identifier
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
    * @return {object}  The student classwork grades average grade data.
    */
-  getGradesAverage: (studentId, runId = utilities.getRunIdForDate()) => {
-    const weightedClasswork = grade.getGradesWeighted(studentId, runId);
+  getGradesAverage: (studentId, mp = utilities.getMpForDate()) => {
+    const weightedClasswork = grade.getGradesWeighted(studentId, mp);
     const courseAverageGrade = {};
 
     Object.keys(weightedClasswork).forEach((cId) => {
@@ -90,12 +88,12 @@ const grade = {
    * Gets the grade average for classwork in the Marked Period.
    * Formatted for GraphQL.
    *
-   * @param  {number}  studentId                        The student identifier
-   * @param  {number}  [runId=utilities.getRunIdForDate()]  The run identifier
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
    * @return {array}  The student classwork grades average grade data.
    */
-  getGradesAverageGql: (studentId, runId = utilities.getRunIdForDate()) => {
-    const gradesAverage = grade.getGradesAverage(studentId, runId);
+  getGradesAverageGql: (studentId, mp = utilities.getMpForDate()) => {
+    const gradesAverage = grade.getGradesAverage(studentId, mp);
 
     return Object.entries(gradesAverage).map(([cId, avg]) => {
       return {

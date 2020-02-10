@@ -5,7 +5,7 @@
       "classwork": [
         {
           "dateDue": "12/19/2019",
-          "dateAssign": "12/09/2019",
+          "dateAssign": "",
           "course": "0123 - 1 Reading",
           "assignment": "Short Story",
           "category": "Assessment",
@@ -20,6 +20,15 @@
           "category": "Daily",
           "score": "75.00",
           "comment": "Late Work"
+        },
+        {
+          "dateDue": "12/18/2019",
+          "dateAssign": "",
+          "course": "4567 - 1 Writing",
+          "assignment": "Short Story",
+          "category": "Daily",
+          "score": "",
+          "comment": ""
         },
         {
           "dateDue": "09/01/2019",

@@ -17,7 +17,11 @@ const student = {
    * @return {object}  The student data record.
    */
   getStudentRecord: (studentId) => {
-    return studentData[studentId];
+    if (studentId === undefined) {
+      return {};
+    }
+
+    return studentData[studentId] || {};
   }
 };
 

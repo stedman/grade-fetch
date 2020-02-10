@@ -9,8 +9,8 @@ const router = express.Router();
 const rootUrl = 'http://localhost:3001/api/v1/students';
 // regex for studentId param format
 const reStudentId = /^\d{6}$/;
-// regex for runId param format
-const reRunId = /^[0-6]$/;
+// regex for Marking Period param format
+const reMp = /^[0-6]$/;
 
 router.use((req, res, next) => {
   // eslint-disable-next-line no-console
@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
         name: students[id].name,
         grade: studentData.grade,
         school: studentData.building,
-        student_url: `${rootUrl}/${id}`
+        studentUrl: `${rootUrl}/${id}`
       });
 
       return acc;
@@ -63,9 +63,9 @@ router.get('/:studentId', (req, res) => {
       name: studentData.name,
       grade: studentData.grade,
       school: studentData.building,
-      assignments_url: `${rootUrl}/${studentId}/assignments`,
-      grades_url: `${rootUrl}/${studentId}/grades`,
-      grades_average_url: `${rootUrl}/${studentId}/grades/average`
+      classworkUrl: `${rootUrl}/${studentId}/classwork`,
+      gradesUrl: `${rootUrl}/${studentId}/grades`,
+      gradesAverageUrl: `${rootUrl}/${studentId}/grades/average`
     });
   } else {
     res.status(400).send('Bad Request');
@@ -75,19 +75,20 @@ router.get('/:studentId', (req, res) => {
 /**
  * Get student classwork.
  *
- * @param {number}  studentId   The school-provided student identifier.
- * @query {number}  runId       The report card run or Marking Period.
+ * @param {number}  studentId     The school-provided student identifier.
+ * @query {number}  [mp=current]  The report card Marking Period.
  */
 router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
-  const runId = reRunId.test(req.query.run) ? req.query.run : undefined;
+  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const studentRecord = student.getStudentRecord(studentId);
 
   if (reStudentId.test(studentId)) {
-    // Get assignments for most recent period, or specific run if provided
+    // Get classwork for most recent period, or specific run if provided
     res.status(200).json({
       id: studentId,
-      name: student.getStudentRecord(studentId).name,
-      assignments: classwork.getClassworkForRun(studentId, runId)
+      name: studentRecord === undefined ? '' : studentRecord.name,
+      assignments: classwork.getScoredClassworkForMp(studentId, mp)
     });
   } else {
     res.status(400).send('Bad Request');
@@ -97,19 +98,21 @@ router.get('/:studentId/classwork', (req, res) => {
 /**
  * Get student grades for specific Marking Period.
  *
- * @param {number}  studentId   The school-provided student identifier.
- * @param {number}  runId       The report card run or Marking Period.
+ * @param {number}  studentId     The school-provided student identifier.
+ * @param {number}  [mp=current]  The report card Marking Period.
  */
 router.get('/:studentId/grades', (req, res) => {
   const { studentId } = req.params;
-  const runId = reRunId.test(req.query.run) ? req.query.run : undefined;
+  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const query = mp ? `?mp=${mp}` : '';
+  const studentRecord = student.getStudentRecord(studentId);
 
-  if (reStudentId.test(studentId)) {
+  if (studentId !== undefined && reStudentId.test(studentId)) {
     res.status(200).json({
       id: studentId,
-      name: student.getStudentRecord(studentId).name,
-      course_grades: grade.getGrades(studentId, runId),
-      grades_average_url: `${rootUrl}/${studentId}/grades/average?run=${runId || ''}`
+      name: studentRecord === undefined ? '' : studentRecord.name,
+      courseGrades: grade.getGrades(studentId, mp),
+      gradesAverageUrl: `${rootUrl}/${studentId}/grades/average${query}`
     });
   } else {
     res.status(400).send('Bad Request');
@@ -119,19 +122,20 @@ router.get('/:studentId/grades', (req, res) => {
 /**
  * Get student daily grade average for specific Marking Period.
  *
- * @param {number}  studentId   The school-provided student identifier.
- * @param {number}  runId       The marking period. Default is current period.
+ * @param {number}  studentId     The school-provided student identifier.
+ * @param {number}  [mp=current]  The marking period. Default is current period.
  */
 router.get('/:studentId/grades/average', (req, res) => {
   const { studentId } = req.params;
-  const runId = reRunId.test(req.query.run) ? req.query.run : undefined;
+  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const studentRecord = student.getStudentRecord(studentId);
 
   if (reStudentId.test(studentId)) {
     res.status(200).json({
       id: studentId,
-      name: student.getStudentRecord(studentId).name,
-      comments: classwork.getClassworkComments(studentId, runId),
-      course_grade_average: grade.getGradesAverageGql(studentId, runId)
+      name: studentRecord === undefined ? '' : studentRecord.name,
+      comments: classwork.getClassworkComments(studentId, mp),
+      courseGradeAverage: grade.getGradesAverageGql(studentId, mp)
     });
   } else {
     res.status(400).send('Bad Request');

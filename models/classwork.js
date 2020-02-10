@@ -2,17 +2,22 @@ const utilities = require('../lib/utilities');
 const course = require('./course');
 const classworkData = require('../data/classwork.json');
 
+// regex for studentId param format
+const reStudentId = /^\d{6}$/;
+
 const classwork = {
   /**
    * Gets the raw student classwork data.
    *
    * @param  {number}  studentId  The student identifier
-   * @return {object}  The raw student classwork data.
+   * @return {array}   The raw student classwork data.
    */
   getClassworkRaw: (studentId) => {
     const studentClasswork = classworkData[studentId];
 
-    if (!studentClasswork) return {};
+    if (studentId === undefined || !reStudentId.test(studentId) || studentClasswork === undefined) {
+      return [];
+    }
 
     // Unless more years are needed, only return the most recent.
     return Object.values(studentClasswork).pop().classwork;
@@ -22,10 +27,14 @@ const classwork = {
    * Gets a student's classwork data and refines it.
    *
    * @param  {number}  studentId  The student identifier
-   * @return {object}  The student classwork with enhancements.
+   * @return {array}   The student classwork with enhancements.
    */
   getClassworkAll: (studentId) => {
     const rawClasswork = classwork.getClassworkRaw(studentId);
+
+    if (studentId === undefined || !reStudentId.test(studentId) || rawClasswork === undefined) {
+      return [];
+    }
 
     return rawClasswork.map((work) => {
       // Get matching course using first 9 chars of classwork course info.
@@ -66,32 +75,57 @@ const classwork = {
   /**
    * Gets a student's classwork for specific Marking Period (report card run).
    *
-   * @param  {number}  studentId                        The student identifier
-   * @param  {number}  [runId=utilities.getRunIdForDate()]  The run identifier
-   * @return {object}  The student classwork data object for period.
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
+   * @return {array}  The student classwork data for period.
    */
-  getClassworkForRun: (studentId, runId = utilities.getRunIdForDate()) => {
-    if (runId === '0') {
+  getClassworkForMp: (studentId, mp = utilities.getMpForDate()) => {
+    if (mp === '0') {
       return classwork.getClassworkAll(studentId);
     }
 
-    const runDateInMs = utilities.getRunDateInMs(runId);
+    const runDateInMs = utilities.getMpDateInMs(mp);
+    const allClasswork = classwork.getClassworkAll(studentId);
 
-    return classwork.getClassworkAll(studentId).filter((work) => {
+    return allClasswork.filter((work) => {
       // Use only classwork in the Marking Period range
       return work.dueMs > runDateInMs.start && work.dueMs < runDateInMs.end;
     });
   },
 
   /**
+   * Gets a student's classwork for specific Marking Period (report card run).
+   *
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
+   * @return {array}  The student classwork data for period.
+   */
+  getScoredClassworkForMp: (studentId, mp = utilities.getMpForDate()) => {
+    if (mp === '0') {
+      return classwork.getClassworkAll(studentId);
+    }
+
+    const runDateInMs = utilities.getMpDateInMs(mp);
+    const allClasswork = classwork.getClassworkAll(studentId);
+
+    return allClasswork.filter((work) => {
+      // Use only classwork in the Marking Period range
+      const inRange = work.dueMs > runDateInMs.start && work.dueMs < runDateInMs.end;
+      const hasScore = work.score !== '';
+
+      return inRange && hasScore;
+    });
+  },
+
+  /**
    * Gets classwork comments for a specific Marking Period.
    *
-   * @param  {number}  studentId                        The student identifier
-   * @param  {number}  [runId=utilities.getRunIdForDate()]  The run identifier
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
    * @return {object}  The student classwork data object for period.
    */
-  getClassworkComments: (studentId, runId = utilities.getRunIdForDate()) => {
-    return classwork.getClassworkForRun(studentId, runId).reduce((acc, work) => {
+  getClassworkComments: (studentId, mp = utilities.getMpForDate()) => {
+    return classwork.getClassworkForMp(studentId, mp).reduce((acc, work) => {
       if (work.comment !== '') {
         acc.push({
           date: work.due,
