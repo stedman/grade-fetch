@@ -65,7 +65,7 @@ const classwork = {
         courseName: courseData.name,
         assignment: work.assignment,
         category: work.category,
-        score: adjusted.score,
+        score: adjusted.score === '' ? '' : +adjusted.score,
         catWeight,
         comment: adjusted.comment.trim()
       };

@@ -79,7 +79,7 @@ describe('/routes/api/students.js', () => {
       assignment: 'Short Story',
       category: 'Assessment',
       comment: '',
-      score: '95.00'
+      score: 95
     };
 
     test('return all student classwork', async () => {

@@ -64,7 +64,7 @@ describe('/models/classwork.js', () => {
         assignment: 'Short Story',
         due: '12/19/2019',
         dueMs: 1576735200000,
-        score: '95.00'
+        score: 95
       });
     });
 
@@ -89,7 +89,7 @@ describe('/models/classwork.js', () => {
           assignment: 'Short Story',
           due: '12/19/2019',
           dueMs: 1576735200000,
-          score: '95.00'
+          score: 95
         },
         {
           catWeight: 0.5,
@@ -99,7 +99,7 @@ describe('/models/classwork.js', () => {
           assignment: 'Short Story',
           due: '12/19/2019',
           dueMs: 1576735200000,
-          score: '75.00'
+          score: 75
         },
         {
           catWeight: 0.7,
@@ -128,7 +128,7 @@ describe('/models/classwork.js', () => {
           assignment: 'Short Story',
           due: '12/19/2019',
           dueMs: 1576735200000,
-          score: '95.00'
+          score: 95
         },
         {
           catWeight: 0.5,
@@ -138,7 +138,7 @@ describe('/models/classwork.js', () => {
           assignment: 'Short Story',
           due: '12/19/2019',
           dueMs: 1576735200000,
-          score: '75.00'
+          score: 75
         }
       ];
 
@@ -154,7 +154,7 @@ describe('/models/classwork.js', () => {
           comment: 'Late Work',
           course: 'Reading',
           date: '12/19/2019',
-          score: '75.00'
+          score: 75
         }
       ];
 
