@@ -84,7 +84,7 @@ describe('/models/grades/', () => {
     test('return grade average for classwork in the Marking Period', () => {
       expect(grade.getGradesAverageGql(mockStudentId, mockMp)).toMatchObject([
         {
-          average: '85.00',
+          average: 85,
           courseId: '0123 - 1'
         }
       ]);

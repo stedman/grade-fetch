@@ -120,9 +120,9 @@ paths:
             maximum: 6
             minimum: 0
           in: query
-          name: run
+          name: mp
           description: |-
-            marking period (run)
+            marking period
             * valid int: `0`-`6`
             * `0` retrieves all records
       requestBody: {}
@@ -171,7 +171,7 @@ paths:
         - schema:
             type: string
           in: query
-          name: run
+          name: mp
   "/students/{id}/grades/average":
     parameters:
       - schema:
@@ -227,7 +227,7 @@ paths:
         - schema:
             type: string
           in: query
-          name: run
+          name: mp
 components:
   schemas:
     classwork:

@@ -1,4 +1,5 @@
 const student = require('../../models/student');
+const classwork = require('../../models/classwork');
 const grade = require('../../models/grade');
 
 const rootValue = {
@@ -30,7 +31,7 @@ const rootValue = {
   student: ({ id }) => {
     const studentData = student.getStudentRecord(id);
 
-    if (studentData === undefined) throw Error('Student ID does not match any record.');
+    if (Object.keys(studentData).length === 0) return {};
 
     return {
       id,
@@ -39,33 +40,25 @@ const rootValue = {
   },
 
   /**
-   * Get student assignments
+   * Get student classwork
    *
    * @param  {String}  arg.studentId  The student identifier
-   * @param  {Number}  arg.runId      The run identifier
+   * @param  {Number}  arg.mp      The run identifier
    * @return {Array}  Student assignments
    */
-  assignments: ({ studentId, runId }) => {
-    if (runId) {
-      return grade.getStudentClassworkPeriodGql(studentId, runId);
-    }
-
-    return grade.getStudentClassworkGql(studentId);
+  classwork: ({ studentId, mp }) => {
+    return classwork.getClassworkForMp(studentId, mp);
   },
 
   /**
    * Get student grade average
    *
    * @param  {String}  arg.studentId  The student identifier
-   * @param  {Number}  arg.runId      The run identifier
+   * @param  {Number}  arg.mp      The run identifier
    * @return {Array}  Student grade averages per course.
    */
-  grade_average: ({ studentId, runId }) => {
-    if (runId) {
-      return grade.getStudentClassworkGradesAverageGql(studentId, runId);
-    }
-
-    return grade.getStudentClassworkGradesAverageGql(studentId);
+  gradeAverage: ({ studentId, mp }) => {
+    return grade.getGradesAverageGql(studentId, mp);
   }
 };
 

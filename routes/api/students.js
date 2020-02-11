@@ -12,12 +12,6 @@ const reStudentId = /^\d{6}$/;
 // regex for Marking Period param format
 const reMp = /^[0-6]$/;
 
-router.use((req, res, next) => {
-  // eslint-disable-next-line no-console
-  console.log(`${new Date().toUTCString()}  ${req.method}  ${req.originalUrl}`);
-  next();
-});
-
 /**
  * Get all student records.
  */
@@ -30,7 +24,7 @@ router.get('/', (req, res) => {
       const studentData = students[id].year[schoolYear];
 
       acc.push({
-        id,
+        id: +id,
         name: students[id].name,
         grade: studentData.grade,
         school: studentData.building,
@@ -59,7 +53,7 @@ router.get('/:studentId', (req, res) => {
 
   if (reStudentId.test(studentId)) {
     res.status(200).json({
-      id: studentId,
+      id: +studentId,
       name: studentData.name,
       grade: studentData.grade,
       school: studentData.building,
@@ -86,7 +80,7 @@ router.get('/:studentId/classwork', (req, res) => {
   if (reStudentId.test(studentId)) {
     // Get classwork for most recent period, or specific run if provided
     res.status(200).json({
-      id: studentId,
+      id: +studentId,
       name: studentRecord === undefined ? '' : studentRecord.name,
       assignments: classwork.getScoredClassworkForMp(studentId, mp)
     });
@@ -109,7 +103,7 @@ router.get('/:studentId/grades', (req, res) => {
 
   if (studentId !== undefined && reStudentId.test(studentId)) {
     res.status(200).json({
-      id: studentId,
+      id: +studentId,
       name: studentRecord === undefined ? '' : studentRecord.name,
       courseGrades: grade.getGrades(studentId, mp),
       gradesAverageUrl: `${rootUrl}/${studentId}/grades/average${query}`
@@ -132,7 +126,7 @@ router.get('/:studentId/grades/average', (req, res) => {
 
   if (reStudentId.test(studentId)) {
     res.status(200).json({
-      id: studentId,
+      id: +studentId,
       name: studentRecord === undefined ? '' : studentRecord.name,
       comments: classwork.getClassworkComments(studentId, mp),
       courseGradeAverage: grade.getGradesAverageGql(studentId, mp)

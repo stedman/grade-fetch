@@ -7,13 +7,13 @@ const mockCourseId = '0123 - 1';
 
 describe('/models/courses', () => {
   describe('getCourse()', () => {
-    test('should return course data', () => {
+    test('return course data', () => {
       expect(courses.getCourse(mockCourseId)).toMatchObject(rawMockData[mockCourseId]);
     });
   });
 
   describe('getCategoryWeight()', () => {
-    test('should return proper weight', () => {
+    test('return proper weight', () => {
       const cat = 'Daily';
       const catWeight = courses.getCategoryWeight(mockCourseId, cat);
 

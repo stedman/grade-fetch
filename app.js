@@ -14,6 +14,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// LOGGING
+app.use((req, res, next) => {
+  // eslint-disable-next-line no-console
+  console.log(`${new Date().toUTCString()}  ${req.method}  ${req.originalUrl}`);
+  next();
+});
+
 // GraphQL
 app.use(
   '/graphql',

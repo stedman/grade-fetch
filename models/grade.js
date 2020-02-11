@@ -99,7 +99,7 @@ const grade = {
       return {
         courseId: cId,
         courseName: course.getCourse(cId).name,
-        average: avg
+        average: +avg
       };
     });
   }

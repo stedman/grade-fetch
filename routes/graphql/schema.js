@@ -7,26 +7,28 @@ const schema = buildSchema(`
     id: Int,
     name: String
   },
-  type Assignment {
+  type Classwork {
     due: String,
     dueMs: Float,
+    assigned: String,
     courseId: String,
-    description: String,
+    courseName: String,
+    assignment: String,
     category: String,
-    score: String,
+    score: Float,
     catWeight: Float,
     comment: String
   },
   type Grade {
     courseId: String,
     courseName: String,
-    average: String
+    average: Float
   },
   type Query {
     students: [Student],
     student(id: Int): Student,
-    assignments(studentId: Int!, runId: Int): [Assignment],
-    grade_average(studentId: Int!, runId: Int): [Grade]
+    classwork(studentId: Int!, mp: Int): [Classwork],
+    gradeAverage(studentId: Int!, mp: Int): [Grade]
   }
 `);
 

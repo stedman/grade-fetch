@@ -83,7 +83,10 @@ The following Roadmap continues to be provisional and will likely change as time
     2. [ ] Migrate models from using flat files to using Mongoose.
 9.  Add authentication.
     1. [ ] // TODO: add express authentication
-10. Migrate from local app to cloud.
+10. Prepare Express for outside world
+    1. [ ] Harden [ExpressJS security](https://expressjs.com/en/advanced/best-practice-security.html)
+    2. [ ] Improve [ExpressJS performance](https://expressjs.com/en/advanced/best-practice-performance.html)
+11. Migrate from local app to cloud.
     1. [ ] // TODO: migrate to cloud
 
 #### Additional considerations for Roadmap
