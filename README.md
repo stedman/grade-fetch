@@ -75,18 +75,19 @@ The following Roadmap continues to be provisional and will likely change as time
             Further on down the road, I am hopeful that a solid spec and the OpenAPI validator will help preserve a working API even as this app evolves — much as unit tests do for code refactoring.
     2. [ ] Install [express-openapi](https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi).
     3. [ ] Install [express-openapi-validator](https://github.com/cdimascio/express-openapi-validator).
-7. Add presentation dashboard.
+7. Harden [ExpressJS security](https://expressjs.com/en/advanced/best-practice-security.html)
+    1. [x] Install [Helmet](https://www.npmjs.com/package/helmet)
+    2. [ ] Install [Express Rate Limit](https://www.npmjs.com/package/express-rate-limit)
+8. Add presentation dashboard.
     1. [x] Install [Nuxt/Vue](https://nuxtjs.org).
     2. [x] Install [vue-charts](https://vue-chartjs.org/).
-8. Migrate data from flat file to database.
+9. Migrate data from flat file to database.
     1. [ ] Install [MongoDB](https://mongodb.com) and [Mongoose]([https://](https://mongoosejs.com)).
     2. [ ] Migrate models from using flat files to using Mongoose.
-9.  Add authentication.
+10. Add authentication.
     1. [ ] // TODO: add express authentication
-10. Prepare Express for outside world
-    1. [ ] Harden [ExpressJS security](https://expressjs.com/en/advanced/best-practice-security.html)
-    2. [ ] Improve [ExpressJS performance](https://expressjs.com/en/advanced/best-practice-performance.html)
-11. Migrate from local app to cloud.
+11. Improve [ExpressJS performance](https://expressjs.com/en/advanced/best-practice-performance.html)
+12. Migrate from local app to cloud.
     1. [ ] // TODO: migrate to cloud
 
 #### Additional considerations for Roadmap
