@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cors = require('cors');
 const graphqlHTTP = require('express-graphql');
 
 const app = express();
@@ -19,10 +20,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  next();
-});
+app.use(cors());
 
 // LOGGING
 // TODO: come up with better logging system
