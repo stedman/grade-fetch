@@ -77,7 +77,7 @@ The following Roadmap continues to be provisional and will likely change as time
     3. [ ] Install [express-openapi-validator](https://github.com/cdimascio/express-openapi-validator).
 7. Harden [ExpressJS security](https://expressjs.com/en/advanced/best-practice-security.html)
     1. [x] Install [Helmet](https://www.npmjs.com/package/helmet)
-    2. [ ] Install [Express Rate Limit](https://www.npmjs.com/package/express-rate-limit)
+    2. [x] Install [Express Rate Limit](https://www.npmjs.com/package/express-rate-limit)
 8. Add presentation dashboard.
     1. [x] Install [Nuxt/Vue](https://nuxtjs.org).
     2. [x] Install [vue-charts](https://vue-chartjs.org/).
