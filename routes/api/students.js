@@ -74,16 +74,28 @@ router.get('/:studentId', (req, res) => {
  */
 router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
-  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
   const studentRecord = student.getStudentRecord(studentId);
+  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const { group } = req.query;
 
   if (reStudentId.test(studentId)) {
-    // Get classwork for most recent period, or specific run if provided
-    res.status(200).json({
-      id: +studentId,
-      name: studentRecord === undefined ? '' : studentRecord.name,
-      assignments: classwork.getScoredClassworkForMp(studentId, mp)
-    });
+    if (group === 'course') {
+      // Get classwork for most recent period, or specific run if provided
+      res.status(200).json({
+        id: +studentId,
+        name: studentRecord === undefined ? '' : studentRecord.name,
+        mp: mp === undefined ? {} : utilities.getMpIntervals(mp),
+        assignments: classwork.getScoredClassworkForMpByCourse(studentId, mp)
+      });
+    } else {
+      // Get classwork for most recent period, or specific run if provided
+      res.status(200).json({
+        id: +studentId,
+        name: studentRecord === undefined ? '' : studentRecord.name,
+        mp: mp === undefined ? {} : utilities.getMpIntervals(mp),
+        assignments: classwork.getScoredClassworkForMp(studentId, mp)
+      });
+    }
   } else {
     res.status(400).send('Bad Request');
   }
@@ -128,7 +140,7 @@ router.get('/:studentId/grades/average', (req, res) => {
     res.status(200).json({
       id: +studentId,
       name: studentRecord === undefined ? '' : studentRecord.name,
-      comments: classwork.getClassworkComments(studentId, mp),
+      alerts: classwork.getClassworkAlerts(studentId, mp),
       courseGradeAverage: grade.getGradesAverageGql(studentId, mp)
     });
   } else {

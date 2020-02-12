@@ -146,7 +146,7 @@ describe('/models/classwork.js', () => {
     });
   });
 
-  describe('getClassworkComments()', () => {
+  describe('getClassworkAlerts()', () => {
     test('return classwork comments for specific Marking Period', () => {
       const expected = [
         {
@@ -158,7 +158,7 @@ describe('/models/classwork.js', () => {
         }
       ];
 
-      expect(classwork.getClassworkComments(mockStudentId, mockMp)).toMatchObject(expected);
+      expect(classwork.getClassworkAlerts(mockStudentId, mockMp)).toMatchObject(expected);
     });
   });
 });

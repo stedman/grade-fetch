@@ -84,12 +84,12 @@ const classwork = {
       return classwork.getClassworkAll(studentId);
     }
 
-    const runDateInMs = utilities.getMpDateInMs(mp);
+    const mpInterval = utilities.getMpIntervals(mp);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
       // Use only classwork in the Marking Period range
-      return work.dueMs > runDateInMs.start && work.dueMs < runDateInMs.end;
+      return work.dueMs > mpInterval.start && work.dueMs < mpInterval.end;
     });
   },
 
@@ -105,12 +105,12 @@ const classwork = {
       return classwork.getClassworkAll(studentId);
     }
 
-    const runDateInMs = utilities.getMpDateInMs(mp);
+    const mpInterval = utilities.getMpIntervals(mp);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
       // Use only classwork in the Marking Period range
-      const inRange = work.dueMs > runDateInMs.start && work.dueMs < runDateInMs.end;
+      const inRange = work.dueMs > mpInterval.start && work.dueMs < mpInterval.end;
       const hasScore = work.score !== '';
 
       return inRange && hasScore;
@@ -118,15 +118,40 @@ const classwork = {
   },
 
   /**
-   * Gets classwork comments for a specific Marking Period.
+   * Gets a student's classwork for specific Marking Period grouped by course.
+   *
+   * @param  {number}  studentId    The student identifier
+   * @param  {number}  [mp=current] The marking period (default is current run)
+   * @return {object}  The student classwork data for period.
+   */
+  getScoredClassworkForMpByCourse: (studentId, mp = utilities.getMpForDate()) => {
+    const scoredClasswork = classwork.getScoredClassworkForMp(studentId, mp);
+
+    return scoredClasswork.reduce((acc, work) => {
+      acc[work.courseId] = acc[work.courseId] || [];
+
+      acc[work.courseId].push({
+        due: work.due,
+        dueMs: work.dueMs,
+        courseName: work.courseName,
+        assignment: work.assignment,
+        score: work.score
+      });
+
+      return acc;
+    }, {});
+  },
+
+  /**
+   * Gets classwork alerts for low scores and comments for a specific Marking Period.
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp=current] The marking period (default is current run)
    * @return {object}  The student classwork data object for period.
    */
-  getClassworkComments: (studentId, mp = utilities.getMpForDate()) => {
+  getClassworkAlerts: (studentId, mp = utilities.getMpForDate()) => {
     return classwork.getClassworkForMp(studentId, mp).reduce((acc, work) => {
-      if (work.comment !== '') {
+      if (work.comment !== '' || (work.score < 70 && work.score !== '')) {
         acc.push({
           date: work.due,
           course: work.courseName,
