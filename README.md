@@ -75,20 +75,24 @@ The following Roadmap continues to be provisional and will likely change as time
             Further on down the road, I am hopeful that a solid spec and the OpenAPI validator will help preserve a working API even as this app evolves — much as unit tests do for code refactoring.
     2. [ ] Install [express-openapi](https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi).
     3. [ ] Install [express-openapi-validator](https://github.com/cdimascio/express-openapi-validator).
-7. Harden [ExpressJS security](https://expressjs.com/en/advanced/best-practice-security.html)
-    1. [x] Install [Helmet](https://www.npmjs.com/package/helmet)
-    2. [x] Install [Express Rate Limit](https://www.npmjs.com/package/express-rate-limit)
-8. Add presentation dashboard.
+7. Add presentation dashboard.
     1. [x] Install [Nuxt/Vue](https://nuxtjs.org).
     2. [x] Install [vue-charts](https://vue-chartjs.org/).
+8. Harden [ExpressJS security](https://expressjs.com/en/advanced/best-practice-security.html) (also review [OWASP REST Security](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html) and [OWASP NodeJS Security](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_security_cheat_sheet.html))1
+    1. [x] Install [Helmet](https://www.npmjs.com/package/helmet).
+    2. [x] Install [Express Rate Limit](https://www.npmjs.com/package/express-rate-limit).
+    3. [x] Install [CORS](https://www.npmjs.com/package/cors).
+    4. [ ] Install authentication (e.g., [Auth0](https://auth0.com/docs/quickstart/backend/nodejs)).
+    5. [ ] Validate all inputs (e.g., paths, queries).
+    6. [ ] Validate `content-type`.
+    7. [ ] Update all response errors to be more generic. Review HTTP status codes.
 9. Migrate data from flat file to database.
     1. [ ] Install [MongoDB](https://mongodb.com) and [Mongoose]([https://](https://mongoosejs.com)).
     2. [ ] Migrate models from using flat files to using Mongoose.
-10. Add authentication.
-    1. [ ] // TODO: add express authentication
-11. Improve [ExpressJS performance](https://expressjs.com/en/advanced/best-practice-performance.html)
-12. Migrate from local app to cloud.
-    1. [ ] // TODO: migrate to cloud
+10. Improve [ExpressJS performance](https://expressjs.com/en/advanced/best-practice-performance.html)
+11. Migrate from local app to cloud.
+    1. [ ] // TODO: Set up cloud solution.
+    2. [ ] // TODO: Set up CI/CD.
 
 #### Additional considerations for Roadmap
 
