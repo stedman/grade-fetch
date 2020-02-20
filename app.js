@@ -26,7 +26,7 @@ app.use(cors());
 // TODO: come up with better logging system
 app.use((req, res, next) => {
   // eslint-disable-next-line no-console
-  console.log(`${new Date().toUTCString()}  ${req.method}  ${req.originalUrl}`);
+  // console.log(`${new Date().toUTCString()}  ${req.method}  ${req.originalUrl}`);
   next();
 });
 
