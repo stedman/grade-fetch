@@ -11,6 +11,8 @@ const rootUrl = 'http://localhost:3001/api/v1/students';
 const reStudentId = /^\d{6}$/;
 // regex for Marking Period param format
 const reMp = /^[0-6]$/;
+// regex for School Year param format
+const reSy = /^(2020-2021)$/;
 
 /**
  * Get all student records.
@@ -76,6 +78,7 @@ router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
   const studentRecord = student.getStudentRecord(studentId);
   const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const sy = reSy.test(req.query.sy) ? req.query.sy : undefined;
   const { group } = req.query;
 
   if (reStudentId.test(studentId)) {
@@ -84,7 +87,7 @@ router.get('/:studentId/classwork', (req, res) => {
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        mp: mp === undefined ? {} : utilities.getMpIntervals(mp),
+        interval: mp === undefined ? {} : utilities.getMpIntervals(mp, sy),
         assignments: classwork.getScoredClassworkForMpByCourse(studentId, mp)
       });
     } else {
@@ -92,8 +95,8 @@ router.get('/:studentId/classwork', (req, res) => {
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        mp: mp === undefined ? {} : utilities.getMpIntervals(mp),
-        assignments: classwork.getScoredClassworkForMp(studentId, mp)
+        interval: mp === undefined ? {} : utilities.getMpIntervals(mp, sy),
+        assignments: classwork.getScoredClassworkForMp(studentId, mp, sy)
       });
     }
   } else {
@@ -110,14 +113,21 @@ router.get('/:studentId/classwork', (req, res) => {
 router.get('/:studentId/grades', (req, res) => {
   const { studentId } = req.params;
   const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
-  const query = mp ? `?mp=${mp}` : '';
+  const sy = reSy.test(req.query.sy) ? req.query.sy : undefined;
+  // Build up query string for HATEOS link.
+  let query = '';
+  const queries = Object.entries(req.params);
+  if (queries.length) {
+    query = `?${queries.join('&')}`;
+  }
+
   const studentRecord = student.getStudentRecord(studentId);
 
   if (studentId !== undefined && reStudentId.test(studentId)) {
     res.status(200).json({
       id: +studentId,
       name: studentRecord === undefined ? '' : studentRecord.name,
-      courseGrades: grade.getGrades(studentId, mp),
+      courseGrades: grade.getGrades(studentId, mp, sy),
       gradesAverageUrl: `${rootUrl}/${studentId}/grades/average${query}`
     });
   } else {

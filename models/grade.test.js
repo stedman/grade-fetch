@@ -8,11 +8,12 @@ const mockStudentId = 123456;
 const nonStudentId = 111111;
 const badFormatStudentId = 'abc123';
 const mockMp = 3;
+const mockSy = 2020;
 
 describe('/models/grades/', () => {
   describe('getGrades()', () => {
     test('return grades for classwork grouped into course and category', () => {
-      expect(grade.getGrades(mockStudentId, mockMp)).toMatchObject({
+      expect(grade.getGrades(mockStudentId, mockMp, mockSy)).toMatchObject({
         '0123 - 1': { Assessment: [95], Daily: [75] }
       });
     });
@@ -32,7 +33,7 @@ describe('/models/grades/', () => {
 
   describe('getGradesWeighted()', () => {
     test('return weighted grades for classwork grouped into course and category', () => {
-      expect(grade.getGradesWeighted(mockStudentId, mockMp)).toMatchObject({
+      expect(grade.getGradesWeighted(mockStudentId, mockMp, mockSy)).toMatchObject({
         '0123 - 1': { Assessment: [47.5], Daily: [37.5] }
       });
     });
@@ -62,7 +63,7 @@ describe('/models/grades/', () => {
     });
 
     test('return grade average for classwork in the Marking Period', () => {
-      expect(grade.getGradesAverage(mockStudentId, mockMp)).toMatchObject({
+      expect(grade.getGradesAverage(mockStudentId, mockMp, mockSy)).toMatchObject({
         '0123 - 1': '85.00'
       });
     });
@@ -82,7 +83,7 @@ describe('/models/grades/', () => {
 
   describe('getGradesAverageGql()', () => {
     test('return grade average for classwork in the Marking Period', () => {
-      expect(grade.getGradesAverageGql(mockStudentId, mockMp)).toMatchObject([
+      expect(grade.getGradesAverageGql(mockStudentId, mockMp, mockSy)).toMatchObject([
         {
           average: 85,
           courseId: '0123 - 1'

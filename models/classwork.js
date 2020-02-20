@@ -76,20 +76,22 @@ const classwork = {
    * Gets a student's classwork for specific Marking Period (report card run).
    *
    * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp=current] The marking period (default is current run)
+   * @param  {number}  [mp]         The marking period
+   * @param  {number}  [sy]         The school year
    * @return {array}  The student classwork data for period.
    */
-  getClassworkForMp: (studentId, mp = utilities.getMpForDate()) => {
+  getClassworkForMp: (studentId, mp, sy) => {
+    // We'll use Marking Period "0" to request ALL records.
     if (mp === '0') {
       return classwork.getClassworkAll(studentId);
     }
 
-    const mpInterval = utilities.getMpIntervals(mp);
+    const mpInterval = utilities.getMpIntervals(mp, sy);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
       // Use only classwork in the Marking Period range
-      return work.dueMs > mpInterval.start && work.dueMs < mpInterval.end;
+      return work.dueMs >= mpInterval.start && work.dueMs <= mpInterval.end;
     });
   },
 
@@ -97,20 +99,22 @@ const classwork = {
    * Gets a student's classwork for specific Marking Period (report card run).
    *
    * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp=current] The marking period (default is current run)
+   * @param  {number}  [mp]         The marking period
+   * @param  {number}  [sy]         The school year
    * @return {array}  The student classwork data for period.
    */
-  getScoredClassworkForMp: (studentId, mp = utilities.getMpForDate()) => {
+  getScoredClassworkForMp: (studentId, mp, sy) => {
+    // We'll use Marking Period "0" to request ALL records.
     if (mp === '0') {
       return classwork.getClassworkAll(studentId);
     }
 
-    const mpInterval = utilities.getMpIntervals(mp);
+    const mpInterval = utilities.getMpIntervals(mp, sy);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
       // Use only classwork in the Marking Period range
-      const inRange = work.dueMs > mpInterval.start && work.dueMs < mpInterval.end;
+      const inRange = work.dueMs >= mpInterval.start && work.dueMs <= mpInterval.end;
       const hasScore = work.score !== '';
 
       return inRange && hasScore;
@@ -121,11 +125,12 @@ const classwork = {
    * Gets a student's classwork for specific Marking Period grouped by course.
    *
    * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp=current] The marking period (default is current run)
+   * @param  {number}  [mp]         The marking period
+   * @param  {number}  [sy]         The school year
    * @return {object}  The student classwork data for period.
    */
-  getScoredClassworkForMpByCourse: (studentId, mp = utilities.getMpForDate()) => {
-    const scoredClasswork = classwork.getScoredClassworkForMp(studentId, mp);
+  getScoredClassworkForMpByCourse: (studentId, mp, sy) => {
+    const scoredClasswork = classwork.getScoredClassworkForMp(studentId, mp, sy);
 
     return scoredClasswork.reduce((acc, work) => {
       acc[work.courseId] = acc[work.courseId] || [];
@@ -146,11 +151,12 @@ const classwork = {
    * Gets classwork alerts for low scores and comments for a specific Marking Period.
    *
    * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp=current] The marking period (default is current run)
+   * @param  {number}  [mp          The marking period
+   * @param  {number}  [sy]         The school year
    * @return {object}  The student classwork data object for period.
    */
-  getClassworkAlerts: (studentId, mp = utilities.getMpForDate()) => {
-    return classwork.getClassworkForMp(studentId, mp).reduce((acc, work) => {
+  getClassworkAlerts: (studentId, mp, sy) => {
+    return classwork.getClassworkForMp(studentId, mp, sy).reduce((acc, work) => {
       if (work.comment !== '' || (work.score < 70 && work.score !== '')) {
         acc.push({
           date: work.due,

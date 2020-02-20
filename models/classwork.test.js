@@ -10,6 +10,7 @@ const nonStudentId = 111111;
 const badFormatStudentId = 'abc123';
 const mockSchoolYear = utilities.getSchoolYear('2020');
 const mockMp = 3;
+const mockSy = 2020;
 
 describe('/models/classwork.js', () => {
   describe('getClassworkRaw()', () => {
@@ -113,7 +114,7 @@ describe('/models/classwork.js', () => {
         }
       ];
 
-      expect(classwork.getClassworkForMp(mockStudentId, mockMp)).toMatchObject(expected);
+      expect(classwork.getClassworkForMp(mockStudentId, mockMp, mockSy)).toMatchObject(expected);
     });
   });
 
