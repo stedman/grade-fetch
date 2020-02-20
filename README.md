@@ -6,7 +6,7 @@
 
 The goal was simple. I wanted a convenient way to periodically review my kids' school grades with them — before the interim and final reports were printed.
 
-Fortunately, grades for classwork and tests are online for my kids and are as up-to-date as the teachers can manage. Unfortunately, the website hasn't aged well. Logging-in and navigating to the necessary pieces of data was quite a chore.
+Fortunately, grades for classwork and tests are online for my kids and are as up-to-date as the teachers can manage. Unfortunately, the website hasn't aged well. Logging-in and navigating to the necessary pieces of data is quite a chore.
 
 ### First requirement: data
 
@@ -43,7 +43,7 @@ The following Roadmap continues to be provisional and will likely change as time
             * Configuring [ESLint rules](https://eslint.org/docs/rules/) is the most important step. While there are several options out there, the [Airbnb config](https://www.npmjs.com/package/eslint-config-airbnb) remains one of the most ubiquitous and practical to use. The rules are reasonable, are very [well-documented](https://github.com/airbnb/javascript), and can be easily overrided locally.
         3. [x] Install [Prettier](https://prettier.io).
             * Prettier is the newest player here and takes code formatting one extra step. Its basic rules are applied upon save to reformat indents, line length, quotation marks, etc.
-2. Scrape student information from school website.
+2. Harvest student information from school website.
     1. [x] Install [Puppeteer](https://pptr.dev/).
         * Puppeteer is a headless Chrome library that can be used to access web pages and their content via a robust API.
         * API ref: https://github.com/puppeteer/puppeteer/blob/v2.0.0/docs/api.md
@@ -54,12 +54,12 @@ The following Roadmap continues to be provisional and will likely change as time
     3. [x] Design data objects.
     4. [x] Store captured data (directly) in flat files.
         * Flat files are simple and flexible for the discovery phase. When the schema settles down, we can move to MongoDB.
-3. Create REST API to save scraped data and retrieve for visualization.
+3. Create REST API to save harvested data and retrieve for visualization.
     1. [x] Install [Express](https://expressjs.com) web framework.
     2. [x] Add rudimentary models and routes for data retrieval.
         * [ ] Implement OpenAPI
     3. [ ] Add models and routes for data mutations: create, update, and delete.
-    4. [ ] Migrate scraper output and other data mutations to use API.
+    4. [ ] Migrate harvester output and other data mutations to use API.
 4. Set up test framework.
     1. [x] Install [Jest](https://jestjs.io).
     2. [x] Add initial tests.
@@ -105,11 +105,13 @@ The following Roadmap continues to be provisional and will likely change as time
 
 ## Install
 
+> IMPORTANT: This application was specifically written to work with the RRISD Home Access site.
+
 ```sh
 npm install
 ```
 
-Create a `.env` at the project root and add your Home Access login credentials:
+Create a `.env` at the project root and add your RRISD Home Access login credentials:
 
 ```sh
 RRISD_USERNAME=your_username
@@ -122,10 +124,10 @@ RRISD_PASSWORD=your_password
 npm start
 ```
 
-### Scrape
+### Harvest
 
 ```sh
-node run scrape
+node run harvest
 ```
 
 ## Test

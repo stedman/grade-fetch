@@ -1,13 +1,13 @@
 {
   "name": "grade-fetch",
   "description": "Fetch data from remote site and save to JSON.",
-  "version": "0.0.1",
-  "main": "rrisd.js",
+  "version": "0.2.0",
+  "main": "server.js",
   "author": "Steve Stedman",
   "license": "WTFPL",
   "scripts": {
     "lint": "eslint ./ --fix",
-    "scrape": "node lib/rrisd/fetchAll.js",
+    "harvest": "node lib/harvest/fetchAll.js",
     "start": "nodemon server.js",
     "test": "jest"
   },
