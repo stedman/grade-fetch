@@ -4,6 +4,7 @@
     "fullname": "Lith, Amber",
     "year": {
       "2020": {
+        "grade": "07",
         "building": "Big Middle School",
         "homeroom": {
           "room": "2135",
@@ -27,6 +28,7 @@
     "fullname": "Lith, Ruby",
     "year": {
       "2020": {
+        "grade": "04",
         "building": "Big Elementary School",
         "homeroom": {
           "room": "1234",

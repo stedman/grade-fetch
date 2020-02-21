@@ -51,14 +51,13 @@ router.get('/', (req, res) => {
  */
 router.get('/:studentId', (req, res) => {
   const { studentId } = req.params;
-  const studentData = student.getStudentRecord(studentId);
+  const studentRecord = student.getStudentRecord(studentId);
 
   if (reStudentId.test(studentId)) {
     res.status(200).json({
       id: +studentId,
-      name: studentData.name,
-      grade: studentData.grade,
-      school: studentData.building,
+      name: studentRecord.name,
+      year: studentRecord.year,
       classworkUrl: `${rootUrl}/${studentId}/classwork`,
       gradesUrl: `${rootUrl}/${studentId}/grades`,
       gradesAverageUrl: `${rootUrl}/${studentId}/grades/average`
@@ -72,7 +71,9 @@ router.get('/:studentId', (req, res) => {
  * Get student classwork.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @query {number}  [mp=current]  The report card Marking Period.
+ * @query {number}  [mp]          The report card Marking Period.
+ * @query {number}  [sy]          The school year.
+ * @query {boolean} [group]       Group the classwork by course.
  */
 router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
@@ -108,7 +109,8 @@ router.get('/:studentId/classwork', (req, res) => {
  * Get student grades for specific Marking Period.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @param {number}  [mp=current]  The report card Marking Period.
+ * @param {number}  [mp]          The report card Marking Period.
+ * @param {number}  [sy]          The school year.
  */
 router.get('/:studentId/grades', (req, res) => {
   const { studentId } = req.params;
@@ -139,7 +141,8 @@ router.get('/:studentId/grades', (req, res) => {
  * Get student daily grade average for specific Marking Period.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @param {number}  [mp=current]  The marking period. Default is current period.
+ * @param {number}  [mp]          The marking period. Default is current period.
+ * @param {number}  [sy]          The school year.
  */
 router.get('/:studentId/grades/average', (req, res) => {
   const { studentId } = req.params;
