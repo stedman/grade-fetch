@@ -10,8 +10,6 @@ const mockStudentId = 123456;
 const badFormatStudentId = 'abc123';
 const nonStudentId = 111111;
 const mockMp = 3;
-const courseGradesData = require('../../data/mock/courseGrades.json');
-const courseGradesAverageData = require('../../data/mock/courseGradesAverage.json');
 
 describe('/routes/graphql/rootValue.js', () => {
   describe('POST graphql query: students', () => {

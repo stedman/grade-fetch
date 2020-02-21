@@ -1,4 +1,3 @@
-const utilities = require('../lib/utilities');
 const classwork = require('./classwork');
 const mockClassworkRaw = require('../data/mock/classwork.json');
 
@@ -8,9 +7,7 @@ jest.mock('../data/course.json', () => require('../data/mock/course.json'));
 const mockStudentId = 123456;
 const nonStudentId = 111111;
 const badFormatStudentId = 'abc123';
-const mockSchoolYear = utilities.getSchoolYear('2020');
 const mockMp = 3;
-const mockSy = 2020;
 
 describe('/models/classwork.js', () => {
   describe('getClassworkRaw()', () => {
@@ -33,7 +30,7 @@ describe('/models/classwork.js', () => {
     });
 
     test('return raw classwork matching mock', () => {
-      expect(rawData).toMatchObject(mockClassworkRaw[mockStudentId][mockSchoolYear].classwork);
+      expect(rawData).toMatchObject(mockClassworkRaw[mockStudentId].classwork);
     });
   });
 
@@ -114,7 +111,7 @@ describe('/models/classwork.js', () => {
         }
       ];
 
-      expect(classwork.getClassworkForMp(mockStudentId, mockMp, mockSy)).toMatchObject(expected);
+      expect(classwork.getClassworkForMp(mockStudentId, mockMp)).toMatchObject(expected);
     });
   });
 

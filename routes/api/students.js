@@ -11,19 +11,16 @@ const rootUrl = 'http://localhost:3001/api/v1/students';
 const reStudentId = /^\d{6}$/;
 // regex for Marking Period param format
 const reMp = /^[0-6]$/;
-// regex for School Year param format
-const reSy = /^(2020-2021)$/;
 
 /**
  * Get all student records.
  */
 router.get('/', (req, res) => {
   const students = student.getAllStudentRecords();
-  const schoolYear = utilities.getSchoolYear();
 
   try {
     const records = Object.keys(students).reduce((acc, id) => {
-      const studentData = students[id].year[schoolYear];
+      const studentData = students[id];
 
       acc.push({
         id: +id,
@@ -57,7 +54,10 @@ router.get('/:studentId', (req, res) => {
     res.status(200).json({
       id: +studentId,
       name: studentRecord.name,
-      year: studentRecord.year,
+      grade: studentRecord.grade,
+      building: studentRecord.building,
+      homeroom: studentRecord.homeroom,
+      courses: studentRecord.courses,
       classworkUrl: `${rootUrl}/${studentId}/classwork`,
       gradesUrl: `${rootUrl}/${studentId}/grades`,
       gradesAverageUrl: `${rootUrl}/${studentId}/grades/average`
@@ -72,14 +72,12 @@ router.get('/:studentId', (req, res) => {
  *
  * @param {number}  studentId     The school-provided student identifier.
  * @query {number}  [mp]          The report card Marking Period.
- * @query {number}  [sy]          The school year.
  * @query {boolean} [group]       Group the classwork by course.
  */
 router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
   const studentRecord = student.getStudentRecord(studentId);
   const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
-  const sy = reSy.test(req.query.sy) ? req.query.sy : undefined;
   const { group } = req.query;
 
   if (reStudentId.test(studentId)) {
@@ -88,7 +86,7 @@ router.get('/:studentId/classwork', (req, res) => {
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: mp === undefined ? {} : utilities.getMpIntervals(mp, sy),
+        interval: mp === undefined ? {} : utilities.getMpIntervals(mp),
         assignments: classwork.getScoredClassworkForMpByCourse(studentId, mp)
       });
     } else {
@@ -96,8 +94,8 @@ router.get('/:studentId/classwork', (req, res) => {
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: mp === undefined ? {} : utilities.getMpIntervals(mp, sy),
-        assignments: classwork.getScoredClassworkForMp(studentId, mp, sy)
+        interval: mp === undefined ? {} : utilities.getMpIntervals(mp),
+        assignments: classwork.getScoredClassworkForMp(studentId, mp)
       });
     }
   } else {
@@ -110,12 +108,10 @@ router.get('/:studentId/classwork', (req, res) => {
  *
  * @param {number}  studentId     The school-provided student identifier.
  * @param {number}  [mp]          The report card Marking Period.
- * @param {number}  [sy]          The school year.
  */
 router.get('/:studentId/grades', (req, res) => {
   const { studentId } = req.params;
   const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
-  const sy = reSy.test(req.query.sy) ? req.query.sy : undefined;
   // Build up query string for HATEOS link.
   let query = '';
   const queries = Object.entries(req.params);
@@ -129,7 +125,7 @@ router.get('/:studentId/grades', (req, res) => {
     res.status(200).json({
       id: +studentId,
       name: studentRecord === undefined ? '' : studentRecord.name,
-      courseGrades: grade.getGrades(studentId, mp, sy),
+      courseGrades: grade.getGrades(studentId, mp),
       gradesAverageUrl: `${rootUrl}/${studentId}/grades/average${query}`
     });
   } else {
@@ -142,7 +138,6 @@ router.get('/:studentId/grades', (req, res) => {
  *
  * @param {number}  studentId     The school-provided student identifier.
  * @param {number}  [mp]          The marking period. Default is current period.
- * @param {number}  [sy]          The school year.
  */
 router.get('/:studentId/grades/average', (req, res) => {
   const { studentId } = req.params;

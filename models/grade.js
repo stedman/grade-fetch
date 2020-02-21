@@ -1,6 +1,5 @@
 const classwork = require('./classwork');
 const course = require('./course');
-const utilities = require('../lib/utilities');
 
 const grade = {
   /**
@@ -8,11 +7,11 @@ const grade = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp]         The marking period
-   * @param  {number}  [sy]         The school year
+   *
    * @return {object}  The student classwork grades data.
    */
-  getGrades: (studentId, mp, sy) => {
-    return classwork.getScoredClassworkForMp(studentId, mp, sy).reduce((acc, work) => {
+  getGrades: (studentId, mp) => {
+    return classwork.getScoredClassworkForMp(studentId, mp).reduce((acc, work) => {
       acc[work.courseId] = acc[work.courseId] || {};
       acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
 
@@ -27,11 +26,11 @@ const grade = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp]         The marking period
-   * @param  {number}  [sy]         The school year
+   *
    * @return {object}  The student classwork grades data weighted.
    */
-  getGradesWeighted: (studentId, mp, sy) => {
-    return classwork.getScoredClassworkForMp(studentId, mp, sy).reduce((acc, work) => {
+  getGradesWeighted: (studentId, mp) => {
+    return classwork.getScoredClassworkForMp(studentId, mp).reduce((acc, work) => {
       acc[work.courseId] = acc[work.courseId] || {};
       acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
 
@@ -46,11 +45,11 @@ const grade = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp]         The marking period
-   * @param  {number}  [sy]         The school year
+   *
    * @return {object}  The student classwork grades average grade data.
    */
-  getGradesAverage: (studentId, mp, sy) => {
-    const weightedClasswork = grade.getGradesWeighted(studentId, mp, sy);
+  getGradesAverage: (studentId, mp) => {
+    const weightedClasswork = grade.getGradesWeighted(studentId, mp);
     const courseAverageGrade = {};
 
     Object.keys(weightedClasswork).forEach((cId) => {
@@ -95,11 +94,11 @@ const grade = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp]         The marking period
-   * @param  {number}  [sy]         The school year
+   *
    * @return {array}  The student classwork grades average grade data.
    */
-  getGradesAverageGql: (studentId, mp, sy) => {
-    const gradesAverage = grade.getGradesAverage(studentId, mp, sy);
+  getGradesAverageGql: (studentId, mp) => {
+    const gradesAverage = grade.getGradesAverage(studentId, mp);
 
     return Object.entries(gradesAverage).map(([cId, avg]) => {
       return {

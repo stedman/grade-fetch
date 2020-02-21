@@ -12,10 +12,20 @@ const mockStudentId = 123456;
 const badFormatStudentId = 'abc123';
 const nonStudentId = 111111;
 const mockMp = 3;
-const mockSy = 2020;
-const courseGradesData = require('../../data/mock/courseGrades.json');
-const courseGradesAverageData = require('../../data/mock/courseGradesAverage.json');
 
+const courseGradesData = {
+  '0123 - 1': {
+    Assessment: [95],
+    Daily: [75]
+  }
+};
+const courseGradesAverageData = [
+  {
+    average: 85,
+    courseId: '0123 - 1',
+    courseName: 'Reading'
+  }
+];
 describe('/routes/api/students.js', () => {
   describe('GET /', () => {
     test('return all student records', async () => {
@@ -84,9 +94,7 @@ describe('/routes/api/students.js', () => {
     };
 
     test('return all student classwork', async () => {
-      const response = await request(app).get(
-        `${routePrefix}/${mockStudentId}/classwork?mp=0&sy=${mockSy}`
-      );
+      const response = await request(app).get(`${routePrefix}/${mockStudentId}/classwork?mp=0`);
 
       expect(response.statusCode).toEqual(200);
       expect(response.body.assignments.length).toEqual(5);
@@ -95,7 +103,7 @@ describe('/routes/api/students.js', () => {
 
     test('return classwork for specific Marking Period', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${mockStudentId}/classwork?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${mockStudentId}/classwork?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(200);
@@ -116,7 +124,7 @@ describe('/routes/api/students.js', () => {
 
     test('return 400 error if invalid studentId format provided', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${badFormatStudentId}/classwork?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${badFormatStudentId}/classwork?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(400);
@@ -124,7 +132,7 @@ describe('/routes/api/students.js', () => {
 
     test('return empty array if no record for provided studentId', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${nonStudentId}/classwork?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${nonStudentId}/classwork?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(200);
@@ -135,7 +143,7 @@ describe('/routes/api/students.js', () => {
   describe('GET /{mockStudentId}/grades)', () => {
     test('return student grades for specific Marking Period', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${mockStudentId}/grades?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${mockStudentId}/grades?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(200);
@@ -147,7 +155,7 @@ describe('/routes/api/students.js', () => {
       utilities.getMpForDate = () => mockMp;
 
       const response = await request(app).get(
-        `${routePrefix}/${mockStudentId}/grades?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${mockStudentId}/grades?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(200);
@@ -156,16 +164,14 @@ describe('/routes/api/students.js', () => {
 
     test('return 400 error if invalid studentId format provided', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${badFormatStudentId}/grades?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${badFormatStudentId}/grades?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(400);
     });
 
     test('return empty array if no record for provided studentId', async () => {
-      const response = await request(app).get(
-        `${routePrefix}/${nonStudentId}/grades?mp=${mockMp}&sy=${mockSy}`
-      );
+      const response = await request(app).get(`${routePrefix}/${nonStudentId}/grades?mp=${mockMp}`);
 
       expect(response.statusCode).toEqual(200);
       expect(Object.keys(response.body.courseGrades)).toHaveLength(0);
@@ -175,7 +181,7 @@ describe('/routes/api/students.js', () => {
   describe('GET /{mockStudentId}/grades/average)', () => {
     test('return average of student course grade averages', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${mockStudentId}/grades/average?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${mockStudentId}/grades/average?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(200);
@@ -194,7 +200,7 @@ describe('/routes/api/students.js', () => {
 
     test('return 400 error if invalid studentId format provided', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${badFormatStudentId}/grades/average?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${badFormatStudentId}/grades/average?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(400);
@@ -202,7 +208,7 @@ describe('/routes/api/students.js', () => {
 
     test('return undefined if no record for provided studentId', async () => {
       const response = await request(app).get(
-        `${routePrefix}/${nonStudentId}/grades/average?mp=${mockMp}&sy=${mockSy}`
+        `${routePrefix}/${nonStudentId}/grades/average?mp=${mockMp}`
       );
 
       expect(response.statusCode).toEqual(200);

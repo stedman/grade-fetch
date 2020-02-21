@@ -2,46 +2,38 @@
   "123456": {
     "name": "Amber Lith",
     "fullname": "Lith, Amber",
-    "year": {
-      "2020": {
-        "grade": "07",
-        "building": "Big Middle School",
-        "homeroom": {
-          "room": "2135",
-          "teacher": "Tickulate, Jess"
-        },
-        "courses": [
-          "787 - 1",
-          "776 - 2",
-          "797 - 3",
-          "731 - 4",
-          "827 - 7",
-          "828 - 7",
-          "720 - 8",
-          "750 - 9"
-        ]
-      }
-    }
+    "grade": "07",
+    "building": "Big Middle School",
+    "homeroom": {
+      "room": "2135",
+      "teacher": "Tickulate, Jess"
+    },
+    "courses": [
+      "787 - 1",
+      "776 - 2",
+      "797 - 3",
+      "731 - 4",
+      "827 - 7",
+      "828 - 7",
+      "720 - 8",
+      "750 - 9"
+    ]
   },
   "234567": {
     "name": "Ruby Lith",
     "fullname": "Lith, Ruby",
-    "year": {
-      "2020": {
-        "grade": "04",
-        "building": "Big Elementary School",
-        "homeroom": {
-          "room": "1234",
-          "teacher": "Zone, Cal"
-        },
-        "courses": [
-          "410 - 2",
-          "420 - 2",
-          "440 - 2",
-          "450 - 2",
-          "460 - 2"
-        ]
-      }
-    }
+    "grade": "04",
+    "building": "Big Elementary School",
+    "homeroom": {
+      "room": "1234",
+      "teacher": "Zone, Cal"
+    },
+    "courses": [
+      "410 - 2",
+      "420 - 2",
+      "440 - 2",
+      "450 - 2",
+      "460 - 2"
+    ]
   }
 }

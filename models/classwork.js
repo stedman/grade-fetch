@@ -20,7 +20,7 @@ const classwork = {
     }
 
     // Unless more years are needed, only return the most recent.
-    return Object.values(studentClasswork).pop().classwork;
+    return studentClasswork.classwork;
   },
 
   /**
@@ -77,16 +77,15 @@ const classwork = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp]         The marking period
-   * @param  {number}  [sy]         The school year
    * @return {array}  The student classwork data for period.
    */
-  getClassworkForMp: (studentId, mp, sy) => {
+  getClassworkForMp: (studentId, mp) => {
     // We'll use Marking Period "0" to request ALL records.
     if (mp === '0') {
       return classwork.getClassworkAll(studentId);
     }
 
-    const mpInterval = utilities.getMpIntervals(mp, sy);
+    const mpInterval = utilities.getMpIntervals(mp);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
@@ -100,16 +99,15 @@ const classwork = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp]         The marking period
-   * @param  {number}  [sy]         The school year
    * @return {array}  The student classwork data for period.
    */
-  getScoredClassworkForMp: (studentId, mp, sy) => {
+  getScoredClassworkForMp: (studentId, mp) => {
     // We'll use Marking Period "0" to request ALL records.
     if (mp === '0') {
       return classwork.getClassworkAll(studentId);
     }
 
-    const mpInterval = utilities.getMpIntervals(mp, sy);
+    const mpInterval = utilities.getMpIntervals(mp);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
@@ -126,11 +124,10 @@ const classwork = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp]         The marking period
-   * @param  {number}  [sy]         The school year
    * @return {object}  The student classwork data for period.
    */
-  getScoredClassworkForMpByCourse: (studentId, mp, sy) => {
-    const scoredClasswork = classwork.getScoredClassworkForMp(studentId, mp, sy);
+  getScoredClassworkForMpByCourse: (studentId, mp) => {
+    const scoredClasswork = classwork.getScoredClassworkForMp(studentId, mp);
 
     return scoredClasswork.reduce((acc, work) => {
       acc[work.courseId] = acc[work.courseId] || [];
@@ -152,11 +149,10 @@ const classwork = {
    *
    * @param  {number}  studentId    The student identifier
    * @param  {number}  [mp          The marking period
-   * @param  {number}  [sy]         The school year
    * @return {object}  The student classwork data object for period.
    */
-  getClassworkAlerts: (studentId, mp, sy) => {
-    return classwork.getClassworkForMp(studentId, mp, sy).reduce((acc, work) => {
+  getClassworkAlerts: (studentId, mp) => {
+    return classwork.getClassworkForMp(studentId, mp).reduce((acc, work) => {
       if (work.comment !== '' || (work.score < 70 && work.score !== '')) {
         acc.push({
           date: work.due,

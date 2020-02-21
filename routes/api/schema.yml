@@ -32,7 +32,7 @@ paths:
                     description: current school name
                   studentUrl:
                     type: string
-                    description: link to student details
+                    description: HATEOS link to student details
                 required:
                   - id
                   - name
@@ -67,40 +67,36 @@ paths:
                   name:
                     type: string
                     description: student name
-                  year:
+                  grade:
+                    type: string
+                    description: current grade level
+                  building:
+                    type: string
+                    description: current school name
+                  homeroom:
                     type: object
-                    description: school year (end)
+                    description: homeroom
                     properties:
-                      "{year}":
-                        type: object
-                        properties:
-                          grade:
-                            type: string
-                            description: current grade level
-                          homeroom:
-                            type: object
-                            description: homeroom
-                            properties:
-                              room:
-                                type: string
-                                description: room number
-                              teacher:
-                                type: string
-                                description: "teacher last name, first name"
-                          gradesUrl:
-                            type: string
-                            description: link to student grades
-                          classworkUrl:
-                            type: string
-                            description: link to student classwork
-                          building:
-                            type: string
-                            description: current school name
-                          courses:
-                            type: array
-                            items:
-                              type: string
-                              description: course identifiers
+                      room:
+                        type: string
+                        description: room number
+                      teacher:
+                        type: string
+                        description: "teacher last name, first name"
+                  courses:
+                    type: array
+                    items:
+                      type: string
+                      description: course identifiers
+                  classworkUrl:
+                    type: string
+                    description: HATEOS link to student classwork
+                  gradesUrl:
+                    type: string
+                    description: HATEOS link to student grades
+                  gradesAverageUrl:
+                    type: string
+                    description: HATEOS link to student grade averages
         "201":
           description: Created
         "400":
@@ -127,15 +123,15 @@ paths:
                   id:
                     type: string
                     description: student identifier
-                  classwork:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/classwork"
                   name:
                     type: string
                     description: student name
                   interval:
                     $ref: "#/components/schemas/interval"
+                  assignments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/classwork"
         "400":
           description: Bad Request
       operationId: get-students-id-classwork
@@ -150,11 +146,6 @@ paths:
             marking period
             * valid int: `0`-`6`
             * `0` retrieves all records
-        - schema:
-            type: integer
-          in: query
-          name: sy
-          description: school year
         - schema:
             type: boolean
           in: query
@@ -185,8 +176,6 @@ paths:
                   name:
                     type: string
                     description: student full name
-                  gradesAverageUrl:
-                    type: string
                   courseGrades:
                     type: object
                     properties:
@@ -200,6 +189,9 @@ paths:
                             items:
                               type: number
                               description: scores for assignments
+                  gradesAverageUrl:
+                    type: string
+                    description: HATEOS link to grade averages
       operationId: get-students-id-grades
       parameters:
         - schema:
@@ -212,11 +204,6 @@ paths:
             marking period
             * valid int: `0`-`6`
             * `0` retrieves all records
-        - schema:
-            type: integer
-          in: query
-          name: sy
-          description: school year
   "/students/{id}/grades/average":
     parameters:
       - schema:
@@ -241,20 +228,27 @@ paths:
                   name:
                     type: string
                     description: student full name
-                  comments:
+                  alerts:
                     type: array
+                    description: alerts for low scores and comments
                     items:
                       type: object
                       properties:
+                        date:
+                          type: string
+                          description: assignment due date
+                        course:
+                          type: string
+                          description: course name
                         assignment:
                           type: string
-                          description: description of assignment
+                          description: assignment description
                         score:
                           type: number
-                          description: score for assignment
+                          description: assignment score
                         comment:
                           type: string
-                          description: comment for assignment
+                          description: assignment comment
                   courseGradeAverage:
                     type: object
                     properties:
@@ -279,11 +273,6 @@ paths:
             marking period
             * valid int: `0`-`6`
             * `0` retrieves all records
-        - schema:
-            type: integer
-          in: query
-          name: sy
-          description: school year
 components:
   schemas:
     classwork:
@@ -296,12 +285,18 @@ components:
         dueMs:
           type: number
           description: "date due, in milliseconds"
+        assigned:
+          type: string
+          description: date assigned
+        assignment:
+          type: string
+          description: description for assignment
         courseId:
           type: string
           description: course identifier
-        assigment:
+        courseName:
           type: string
-          description: description for assignment
+          description: course name
         score:
           type: number
           description: score for assignment
@@ -311,12 +306,6 @@ components:
         comment:
           type: string
           description: comment on assignment
-        assigned:
-          type: string
-          description: date assigned
-        courseName:
-          type: string
-          description: course name
     interval:
       title: interval
       type: object
