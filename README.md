@@ -2,23 +2,27 @@
 
 > **WIP**: WORK IN PROGRESS
 
+* [Overview](#overview)
+* [Installation](#installation)
+* [Roadmap](#roadmap)
+
 ## Overview
 
-The goal was simple. I wanted a convenient way to periodically review my kids' school grades with them — before the interim and final reports were printed.
+The goal was simple. I wanted a convenient way to periodically review my kids' school grades with them — before the end of the grading periods and the final reports were printed.
 
-Fortunately, grades for classwork and tests are online for my kids and are as up-to-date as the teachers can manage. Unfortunately, the website hasn't aged well. Logging-in and navigating to the necessary pieces of data is quite a chore.
+Fortunately, the grades for my kids' classwork and tests are available online and are as up-to-date as the teachers can manage. Unfortunately, the RRISD Home Access website needs some serious UX love. Logging-in and navigating to the necessary pieces of data is quite a chore.
 
 ### First requirement: data
 
-My first solution was to login to the site, manually copy classwork data and daily course averages, and then paste them into a spreadsheet. The solved the need to manipulate the data as needed and present it in a meaningful way, but it was obviously laborious and subject to data entry errors.
+My first approach was to login to the site, manually copy the classwork and daily course data, and then plug those pieces of information into a spreadsheet. This allowed me to manipulate the data and present it in a meaningful way, but it was an obviously laborious undertaking and subject to data entry errors.
 
-I looked for an API to ease the pain but none were to be found. So I chose to go the data scraping route. While it would be fun to toy with Python and BeautifulSoup, I chose to keep the learning curve short and stick with Node.
+I dug around the site code in search of an API to ease the pain but found nothing. So I chose to go the data harvesting route.
 
-[Puppeteer](https://pptr.dev/) is a pretty neat headless Chrome library that I've used in the past to run end-to-end tests. I figured it would work just as well at scraping sites and then saving the data to a local file. From there, the data file could be imported into a spreadsheet for further analysis and charting. But that seemed silly given all the amazing dataviz libraries available today.
+[Puppeteer](https://pptr.dev/) is a nifty headless Chrome library that I've used in the past to run end-to-end tests. I figured it might just work as well at harvesting data from sites. From there, I could automate the flow of data into a spreadsheet for further analysis and charting.
 
 ### Second requirement: presentation
 
-The design pattern needed here is clearly a dashboard — a place to assemble all the daily student information in one screen. What was initially a concept to help review grades could be extended to display other pertinent information such as cafeteria menus, recess weather forecasts, and calendars. Furthermore, this application could be configured to send text messages for late classwork, favorite menu items being served today, etc.
+Better yet, I could create a dashboard application that would stitch together elements useful for daily K-12 student life (e.g., school menus, weather (for recess/gym), Google Classroom calendars). This application could also be configured to send text messages for upcoming or late classwork, favorite menu items being served today, etc.
 
 ### Execution
 
@@ -26,9 +30,52 @@ The repos for this project are broken up into the two base requirements: 1) coll
 
 In addition to Puppeteer, the data sub-project uses a tech stack that should be familiar: ExpressJS, MongoDB, OpenAPI, and GraphQL.
 
-### Roadmap
+---
 
-The following Roadmap continues to be provisional and will likely change as time goes on:
+## Installation
+
+```sh
+npm install
+```
+
+Create a `.env` file at the project root and add your RRISD Home Access login credentials like so:
+
+> IMPORTANT: This application was specifically written to work with the RRISD Home Access site.
+
+```sh
+RRISD_USERNAME=your_username
+RRISD_PASSWORD=your_password
+```
+
+### Harvest
+
+```sh
+node run harvest
+```
+
+Note that harvesting takes 10-15 seconds on average to complete. Be patient.
+
+### Run
+
+```sh
+npm start
+```
+
+For REST API, use [Postman](https://getpostman.com) or your browser to *get* http://localhost:3001/api/v1/students . See the OpenAPI schema at `/routes/api/schema.yml` for more details.
+
+For GraphQL, point your browser to http://localhost:3001/graphql . See the GraphQL schema at `/routes/graphql/schema.js`.
+
+### Test
+
+```sh
+npm test
+```
+
+---
+
+## Roadmap
+
+The following Roadmap is provisional and will likely evolve:
 
 1. Set up environment
     1. [x] Node (v12) + npm
@@ -49,8 +96,7 @@ The following Roadmap continues to be provisional and will likely change as time
         * API ref: https://github.com/puppeteer/puppeteer/blob/v2.0.0/docs/api.md
         * tutorial ref: https://www.toptal.com/puppeteer/headless-browser-puppeteer-tutorial
     2. [x] Set up DOM selectors to capture page data.
-        * The current setup has the config and code very tightly coupled to a specific site.
-            * [ ] // FIXME: refactor scraping operation to decouple config, code, and site.
+        * I had all good intentions of creating a site-agnostic harvester but soon realized that the task of decoupling pages, selectors, and actions was overwhelming. So I backed off and went with a RRISD Home Access specific implementation.
     3. [x] Design data objects.
     4. [x] Store captured data (directly) in flat files.
         * Flat files are simple and flexible for the discovery phase. When the schema settles down, we can move to MongoDB.
@@ -94,44 +140,8 @@ The following Roadmap continues to be provisional and will likely change as time
     1. [ ] // TODO: Set up cloud solution.
     2. [ ] // TODO: Set up CI/CD.
 
-#### Additional considerations for Roadmap
+### Additional considerations for Roadmap
 
 * Migrate to ECMAScript Modules (ESM). If [Node 12+ ESM implementation](https://nodejs.org/docs/latest-v12.x/api/esm.html) doesn't work, add [Babel](https://babeljs.io) as a dependency?
 * Migrate to [Typescript](https://www.typescriptlang.org) for its type checking, autocompletion in VSCode, and because it's the latest hotness.
-* Create a [ReactJS](https://reactjs.org) version of the presentation dashboard?
 * Use Docker containers.
-
----
-
-## Install
-
-> IMPORTANT: This application was specifically written to work with the RRISD Home Access site.
-
-```sh
-npm install
-```
-
-Create a `.env` at the project root and add your RRISD Home Access login credentials:
-
-```sh
-RRISD_USERNAME=your_username
-RRISD_PASSWORD=your_password
-```
-
-## Run
-
-```sh
-npm start
-```
-
-### Harvest
-
-```sh
-node run harvest
-```
-
-## Test
-
-```sh
-npm test
-```
