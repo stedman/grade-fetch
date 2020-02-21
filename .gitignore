@@ -12,3 +12,4 @@
 data/*
 !data/mock
 node_modules
+testCoverage
