@@ -1,4 +1,4 @@
-const utilities = require('../lib/utilities');
+const period = require('../models/period');
 const course = require('./course');
 const classworkData = require('../data/classwork.json');
 
@@ -10,6 +10,7 @@ const classwork = {
    * Gets the raw student classwork data.
    *
    * @param  {number}  studentId  The student identifier
+   *
    * @return {array}   The raw student classwork data.
    */
   getClassworkRaw: (studentId) => {
@@ -27,6 +28,7 @@ const classwork = {
    * Gets a student's classwork data and refines it.
    *
    * @param  {number}  studentId  The student identifier
+   *
    * @return {array}   The student classwork with enhancements.
    */
   getClassworkAll: (studentId) => {
@@ -86,7 +88,7 @@ const classwork = {
       return classwork.getClassworkAll(studentId);
     }
 
-    const interval = utilities.getGradingPeriodTime(periodIndex, periodKey);
+    const interval = period.getGradingPeriodTime(periodIndex, periodKey);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
@@ -110,7 +112,7 @@ const classwork = {
       return classwork.getClassworkAll(studentId);
     }
 
-    const interval = utilities.getGradingPeriodTime(periodIndex, periodKey);
+    const interval = period.getGradingPeriodTime(periodIndex, periodKey);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {

@@ -1,5 +1,5 @@
 const express = require('express');
-const utilities = require('../../lib/utilities');
+const period = require('../../models/period');
 const student = require('../../models/student');
 const classwork = require('../../models/classwork');
 const grade = require('../../models/grade');
@@ -88,7 +88,7 @@ router.get('/:studentId/classwork', (req, res) => {
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: gp === undefined ? {} : utilities.getGradingPeriodTime(gp, periodKey),
+        interval: gp === undefined ? {} : period.getGradingPeriodTime(gp, periodKey),
         assignments: classwork.getScoredClassworkForGradingPeriodByCourse(studentId, gp, periodKey)
       });
     } else {
@@ -96,7 +96,7 @@ router.get('/:studentId/classwork', (req, res) => {
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: gp === undefined ? {} : utilities.getGradingPeriodTime(gp, periodKey),
+        interval: gp === undefined ? {} : period.getGradingPeriodTime(gp, periodKey),
         assignments: classwork.getScoredClassworkForGradingPeriod(studentId, gp, periodKey)
       });
     }

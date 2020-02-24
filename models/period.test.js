@@ -1,10 +1,10 @@
-const utilities = require('./utilities');
+const period = require('./period');
 const mockPeriodData = require('../data/mock/gradingPeriods.json');
 
-describe('/lib/utilities.js', () => {
+describe('/lib/period.js', () => {
   describe('getSchoolYear()', () => {
     const expectedYear = new Date().getFullYear().toString();
-    const schoolYear = utilities.getSchoolYear();
+    const schoolYear = period.getSchoolYear();
 
     test('returns current school year', () => {
       expect(schoolYear).toEqual(expectedYear);
@@ -15,20 +15,20 @@ describe('/lib/utilities.js', () => {
     const testDate = '2000/01/01';
 
     test('returns school year for provided date string', () => {
-      const schoolYear = utilities.getSchoolYear(testDate);
+      const schoolYear = period.getSchoolYear(testDate);
 
       expect(schoolYear).toEqual('2000');
     });
 
     test('returns school year for provided Date object', () => {
-      const schoolYear = utilities.getSchoolYear(new Date(testDate));
+      const schoolYear = period.getSchoolYear(new Date(testDate));
 
       expect(schoolYear).toEqual('2000');
     });
 
     test('returns current school year if arg is not legit date', () => {
       const expectedYear = new Date().getFullYear().toString();
-      const schoolYear = utilities.getSchoolYear('invalid');
+      const schoolYear = period.getSchoolYear('invalid');
 
       expect(schoolYear).toEqual(expectedYear);
     });
@@ -42,7 +42,7 @@ describe('/lib/utilities.js', () => {
 
     test('return Grading Period for specified grade level', () => {
       grades.forEach((grade) => {
-        const result = utilities.getGradingPeriodsFromGradeLevel(grade.level);
+        const result = period.getGradingPeriodsFromGradeLevel(grade.level);
 
         expect(result).toMatchObject(mockPeriodData[grade.key]);
       });
@@ -52,7 +52,7 @@ describe('/lib/utilities.js', () => {
   describe('getGradingPeriodIndex()', () => {
     const dateMs = 1579096288679;
     const periodKey = 'sixWeek';
-    const result = utilities.getGradingPeriodIndex(dateMs, periodKey);
+    const result = period.getGradingPeriodIndex(dateMs, periodKey);
 
     test('return run identifier for date', () => {
       expect(result).toEqual(4);
@@ -63,7 +63,7 @@ describe('/lib/utilities.js', () => {
     test('return Grading Period date in milliseconds', () => {
       const periodIndex = 3;
       const periodKey = 'sixWeek';
-      const result = utilities.getGradingPeriodTime(periodIndex, periodKey);
+      const result = period.getGradingPeriodTime(periodIndex, periodKey);
       const expectedInterval = {
         start: 1572847200000,
         end: 1576735200000,

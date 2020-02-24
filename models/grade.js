@@ -108,10 +108,10 @@ const grade = {
   getGradesAverageGql: (studentId, periodIndex, periodKey) => {
     const gradesAverage = grade.getGradesAverage(studentId, periodIndex, periodKey);
 
-    return Object.entries(gradesAverage).map(([cId, avg]) => {
+    return Object.entries(gradesAverage).map(([courseId, avg]) => {
       return {
-        courseId: cId,
-        courseName: course.getCourse(cId).name,
+        courseId,
+        courseName: course.getCourse(courseId).name,
         average: +avg
       };
     });

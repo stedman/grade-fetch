@@ -1,5 +1,5 @@
 const grade = require('./grade');
-const utilities = require('../lib/utilities');
+const period = require('../models/period');
 
 jest.mock('../data/classwork.json', () => require('../data/mock/classwork.json'));
 jest.mock('../data/course.json', () => require('../data/mock/course.json'));
@@ -62,8 +62,8 @@ describe('/models/grades/', () => {
   describe('getGradesAverage()', () => {
     test('grade average for classwork in the default (current) marking period', () => {
       // Override upstream method to return expected periodIndex for test
-      jest.mock('../lib/utilities');
-      utilities.getGradingPeriodIndex = () => mockPeriodIndex;
+      jest.mock('../models/period');
+      period.getGradingPeriodIndex = () => mockPeriodIndex;
 
       const result = grade.getGradesAverage(mockStudentId);
 

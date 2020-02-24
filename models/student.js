@@ -1,5 +1,5 @@
 const studentData = require('../data/student.json');
-const utilities = require('../lib/utilities');
+const period = require('../models/period');
 
 const student = {
   /**
@@ -26,7 +26,7 @@ const student = {
     const studentRecord = studentData[studentId] || {};
 
     if (studentRecord.grade) {
-      studentRecord.gradingPeriodKey = utilities.getGradingPeriodKey(studentRecord.grade);
+      studentRecord.gradingPeriodKey = period.getGradingPeriodKey(studentRecord.grade);
     }
 
     return studentRecord;

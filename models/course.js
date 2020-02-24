@@ -5,6 +5,7 @@ const course = {
    * Gets the course.
    *
    * @param  {string}  courseId  The course identifier
+   *
    * @return {object}  The course data object.
    */
   getCourse: (courseId) => {
@@ -15,6 +16,7 @@ const course = {
    *
    * @param  {string}  courseId      The course identifier
    * @param  {string}  categoryName  The category name
+   *
    * @return {number}  The category weight.
    */
   getCategoryWeight: (courseId, categoryName) => {

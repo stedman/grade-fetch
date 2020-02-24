@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../app');
-const utilities = require('../../lib/utilities');
+const period = require('../../models/period');
 
 const routePrefix = '/api/v1/students';
 
@@ -112,8 +112,8 @@ describe('/routes/api/students.js', () => {
     });
 
     test('return classwork for default Marking Period', async () => {
-      jest.mock('../../lib/utilities');
-      utilities.getGradingPeriodIndex = () => mockPeriodIndex;
+      jest.mock('../../models/period');
+      period.getGradingPeriodIndex = () => mockPeriodIndex;
 
       const response = await request(app).get(`${routePrefix}/${mockStudentId}/classwork`);
 
@@ -151,8 +151,8 @@ describe('/routes/api/students.js', () => {
     });
 
     test('return student grades for default Marking Period', async () => {
-      jest.mock('../../lib/utilities');
-      utilities.getGradingPeriodIndex = () => mockPeriodIndex;
+      jest.mock('../../models/period');
+      period.getGradingPeriodIndex = () => mockPeriodIndex;
 
       const response = await request(app).get(
         `${routePrefix}/${mockStudentId}/grades?mp=${mockPeriodIndex}`
@@ -191,8 +191,8 @@ describe('/routes/api/students.js', () => {
     });
 
     test('return average of student course grade averages for default time', async () => {
-      jest.mock('../../lib/utilities');
-      utilities.getGradingPeriodIndex = () => mockPeriodIndex;
+      jest.mock('../../models/period');
+      period.getGradingPeriodIndex = () => mockPeriodIndex;
 
       const response = await request(app).get(`${routePrefix}/${mockStudentId}/grades/average`);
 
