@@ -9,7 +9,7 @@ const routePrefix = '/graphql';
 const mockStudentId = 123456;
 const badFormatStudentId = 'abc123';
 const nonStudentId = 111111;
-const mockMp = 3;
+const mockPeriodIndex = 3;
 
 describe('/routes/graphql/rootValue.js', () => {
   describe('POST graphql query: students', () => {
@@ -120,7 +120,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          classwork(studentId: ${mockStudentId}, mp: ${mockMp}) {
+          classwork(studentId: ${mockStudentId}, gp: ${mockPeriodIndex}) {
             due,
             dueMs,
             assigned,
@@ -171,7 +171,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          classwork(studentId: ${nonStudentId}, mp: ${mockMp}) {
+          classwork(studentId: ${nonStudentId}, gp: ${mockPeriodIndex}) {
             assignment
           }
         }`
@@ -188,7 +188,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          gradeAverage(studentId: ${mockStudentId}, mp: ${mockMp}) {
+          gradeAverage(studentId: ${mockStudentId}, gp: ${mockPeriodIndex}) {
             courseId,
             courseName,
             average
@@ -225,7 +225,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          gradeAverage(studentId: ${nonStudentId}, mp: ${mockMp}) {
+          gradeAverage(studentId: ${nonStudentId}, gp: ${mockPeriodIndex}) {
             average
           }
         }`

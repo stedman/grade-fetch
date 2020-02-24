@@ -7,83 +7,99 @@ jest.mock('../data/course.json', () => require('../data/mock/course.json'));
 const mockStudentId = 123456;
 const nonStudentId = 111111;
 const badFormatStudentId = 'abc123';
-const mockMp = 3;
-const mockSy = 2020;
+const mockPeriodKey = 'sixWeek';
+const mockPeriodIndex = 3;
 
 describe('/models/grades/', () => {
   describe('getGrades()', () => {
     test('return grades for classwork grouped into course and category', () => {
-      expect(grade.getGrades(mockStudentId, mockMp, mockSy)).toMatchObject({
+      const result = grade.getGrades(mockStudentId, mockPeriodIndex, mockPeriodKey);
+      expect(result).toMatchObject({
         '0123 - 1': { Assessment: [95], Daily: [75] }
       });
     });
 
     test('return empty record for unrecorded student ID', () => {
-      expect(grade.getGrades(nonStudentId)).toMatchObject({});
+      const result = grade.getGrades(nonStudentId);
+      expect(result).toMatchObject({});
     });
 
     test('return empty record for bad format student ID', () => {
-      expect(grade.getGrades(badFormatStudentId)).toMatchObject({});
+      const result = grade.getGrades(badFormatStudentId);
+      expect(result).toMatchObject({});
     });
 
     test('return empty record for no student ID', () => {
-      expect(grade.getGrades()).toMatchObject({});
+      const result = grade.getGrades();
+      expect(result).toMatchObject({});
     });
   });
 
   describe('getGradesWeighted()', () => {
     test('return weighted grades for classwork grouped into course and category', () => {
-      expect(grade.getGradesWeighted(mockStudentId, mockMp, mockSy)).toMatchObject({
+      const result = grade.getGradesWeighted(mockStudentId, mockPeriodIndex, mockPeriodKey);
+      expect(result).toMatchObject({
         '0123 - 1': { Assessment: [47.5], Daily: [37.5] }
       });
     });
 
     test('return empty record for unrecorded student ID', () => {
-      expect(grade.getGradesWeighted(nonStudentId)).toMatchObject({});
+      const result = grade.getGradesWeighted(nonStudentId);
+      expect(result).toMatchObject({});
     });
 
     test('return empty record for bad format student ID', () => {
-      expect(grade.getGradesWeighted(badFormatStudentId)).toMatchObject({});
+      const result = grade.getGradesWeighted(badFormatStudentId);
+      expect(result).toMatchObject({});
     });
 
     test('return empty record for no student ID', () => {
-      expect(grade.getGradesWeighted()).toMatchObject({});
+      const result = grade.getGradesWeighted();
+      expect(result).toMatchObject({});
     });
   });
 
   describe('getGradesAverage()', () => {
     test('grade average for classwork in the default (current) marking period', () => {
-      // Override getMpForDate() to return expected MP for test
+      // Override upstream method to return expected periodIndex for test
       jest.mock('../lib/utilities');
-      utilities.getMpForDate = () => mockMp;
+      utilities.getGradingPeriodIndex = () => mockPeriodIndex;
 
-      expect(grade.getGradesAverage(mockStudentId)).toMatchObject({
+      const result = grade.getGradesAverage(mockStudentId);
+
+      expect(result).toMatchObject({
         '0123 - 1': '85.00'
       });
     });
 
     test('return grade average for classwork in the Marking Period', () => {
-      expect(grade.getGradesAverage(mockStudentId, mockMp, mockSy)).toMatchObject({
+      const result = grade.getGradesAverage(mockStudentId, mockPeriodIndex, mockPeriodKey);
+      expect(result).toMatchObject({
         '0123 - 1': '85.00'
       });
     });
 
     test('return empty record for unrecorded student ID', () => {
-      expect(grade.getGradesAverage(nonStudentId)).toMatchObject({});
+      const result = grade.getGradesAverage(nonStudentId);
+      expect(result).toMatchObject({});
     });
 
     test('return empty record for bad format student ID', () => {
-      expect(grade.getGradesAverage(badFormatStudentId)).toMatchObject({});
+      const result = grade.getGradesAverage(badFormatStudentId);
+      expect(result).toMatchObject({});
     });
 
     test('return empty record for no student ID', () => {
-      expect(grade.getGradesAverage()).toMatchObject({});
+      const result = grade.getGradesAverage();
+      expect(result).toMatchObject({});
     });
   });
 
   describe('getGradesAverageGql()', () => {
     test('return grade average for classwork in the Marking Period', () => {
-      expect(grade.getGradesAverageGql(mockStudentId, mockMp, mockSy)).toMatchObject([
+      expect(
+        grade.getGradesAverageGql(mockStudentId, mockPeriodIndex, mockPeriodKey)
+      ).toMatchObject([
         {
           average: 85,
           courseId: '0123 - 1'

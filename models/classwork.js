@@ -45,7 +45,6 @@ const classwork = {
           ? { score: 0, comment: `[missing work] ${work.comment}` }
           : { score: work.score, comment: work.comment };
       const courseData = course.getCourse(courseId);
-
       const catWeight = courseData.category[work.category];
 
       if (catWeight === undefined) {
@@ -75,44 +74,48 @@ const classwork = {
   /**
    * Gets a student's classwork for specific Marking Period (report card run).
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp]         The marking period
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
+   *
    * @return {array}  The student classwork data for period.
    */
-  getClassworkForMp: (studentId, mp) => {
+  getClassworkForGradingPeriod: (studentId, periodIndex, periodKey) => {
     // We'll use Marking Period "0" to request ALL records.
-    if (mp === '0') {
+    if (periodIndex === '0') {
       return classwork.getClassworkAll(studentId);
     }
 
-    const mpInterval = utilities.getMpIntervals(mp);
+    const interval = utilities.getGradingPeriodTime(periodIndex, periodKey);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
       // Use only classwork in the Marking Period range
-      return work.dueMs >= mpInterval.start && work.dueMs <= mpInterval.end;
+      return work.dueMs >= interval.start && work.dueMs <= interval.end;
     });
   },
 
   /**
    * Gets a student's classwork for specific Marking Period (report card run).
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp]         The marking period
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
+   *
    * @return {array}  The student classwork data for period.
    */
-  getScoredClassworkForMp: (studentId, mp) => {
+  getScoredClassworkForGradingPeriod: (studentId, periodIndex, periodKey) => {
     // We'll use Marking Period "0" to request ALL records.
-    if (mp === '0') {
+    if (periodIndex === '0') {
       return classwork.getClassworkAll(studentId);
     }
 
-    const mpInterval = utilities.getMpIntervals(mp);
+    const interval = utilities.getGradingPeriodTime(periodIndex, periodKey);
     const allClasswork = classwork.getClassworkAll(studentId);
 
     return allClasswork.filter((work) => {
       // Use only classwork in the Marking Period range
-      const inRange = work.dueMs >= mpInterval.start && work.dueMs <= mpInterval.end;
+      const inRange = work.dueMs >= interval.start && work.dueMs <= interval.end;
       const hasScore = work.score !== '';
 
       return inRange && hasScore;
@@ -122,12 +125,18 @@ const classwork = {
   /**
    * Gets a student's classwork for specific Marking Period grouped by course.
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp]         The marking period
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
+   *
    * @return {object}  The student classwork data for period.
    */
-  getScoredClassworkForMpByCourse: (studentId, mp) => {
-    const scoredClasswork = classwork.getScoredClassworkForMp(studentId, mp);
+  getScoredClassworkForGradingPeriodByCourse: (studentId, periodIndex, periodKey) => {
+    const scoredClasswork = classwork.getScoredClassworkForGradingPeriod(
+      studentId,
+      periodIndex,
+      periodKey
+    );
 
     return scoredClasswork.reduce((acc, work) => {
       acc[work.courseId] = acc[work.courseId] || [];
@@ -147,24 +156,28 @@ const classwork = {
   /**
    * Gets classwork alerts for low scores and comments for a specific Marking Period.
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp          The marking period
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
+   *
    * @return {object}  The student classwork data object for period.
    */
-  getClassworkAlerts: (studentId, mp) => {
-    return classwork.getClassworkForMp(studentId, mp).reduce((acc, work) => {
-      if (work.comment !== '' || (work.score < 70 && work.score !== '')) {
-        acc.push({
-          date: work.due,
-          course: work.courseName,
-          assignment: work.assignment,
-          score: work.score,
-          comment: work.comment
-        });
-      }
+  getClassworkAlerts: (studentId, periodIndex, periodKey) => {
+    return classwork
+      .getClassworkForGradingPeriod(studentId, periodIndex, periodKey)
+      .reduce((acc, work) => {
+        if (work.comment !== '' || (work.score < 70 && work.score !== '')) {
+          acc.push({
+            date: work.due,
+            course: work.courseName,
+            assignment: work.assignment,
+            score: work.score,
+            comment: work.comment
+          });
+        }
 
-      return acc;
-    }, []);
+        return acc;
+      }, []);
   }
 };
 

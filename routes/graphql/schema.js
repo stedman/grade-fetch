@@ -27,8 +27,8 @@ const schema = buildSchema(`
   type Query {
     students: [Student],
     student(id: Int): Student,
-    classwork(studentId: Int!, mp: Int): [Classwork],
-    gradeAverage(studentId: Int!, mp: Int): [Grade]
+    classwork(studentId: Int!, gp: Int): [Classwork],
+    gradeAverage(studentId: Int!, gp: Int): [Grade]
   }
 `);
 

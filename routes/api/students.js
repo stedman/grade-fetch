@@ -10,7 +10,7 @@ const rootUrl = 'http://localhost:3001/api/v1/students';
 // regex for studentId param format
 const reStudentId = /^\d{6}$/;
 // regex for Marking Period param format
-const reMp = /^[0-6]$/;
+const reGp = /^[0-6]$/;
 
 /**
  * Get all student records.
@@ -71,31 +71,33 @@ router.get('/:studentId', (req, res) => {
  * Get student classwork.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @query {number}  [mp]          The report card Marking Period.
+ * @query {number}  [gp]          The report card Grading Period.
  * @query {boolean} [group]       Group the classwork by course.
  */
 router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
-  const studentRecord = student.getStudentRecord(studentId);
-  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const gp = reGp.test(req.query.gp) ? req.query.gp : undefined;
   const { group } = req.query;
 
   if (reStudentId.test(studentId)) {
+    const studentRecord = student.getStudentRecord(studentId);
+    const periodKey = studentRecord.gradingPeriodKey;
+
     if (group === 'course') {
       // Get classwork for most recent period, or specific run if provided
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: mp === undefined ? {} : utilities.getMpIntervals(mp),
-        assignments: classwork.getScoredClassworkForMpByCourse(studentId, mp)
+        interval: gp === undefined ? {} : utilities.getGradingPeriodTime(gp, periodKey),
+        assignments: classwork.getScoredClassworkForGradingPeriodByCourse(studentId, gp, periodKey)
       });
     } else {
       // Get classwork for most recent period, or specific run if provided
       res.status(200).json({
         id: +studentId,
         name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: mp === undefined ? {} : utilities.getMpIntervals(mp),
-        assignments: classwork.getScoredClassworkForMp(studentId, mp)
+        interval: gp === undefined ? {} : utilities.getGradingPeriodTime(gp, periodKey),
+        assignments: classwork.getScoredClassworkForGradingPeriod(studentId, gp, periodKey)
       });
     }
   } else {
@@ -104,19 +106,19 @@ router.get('/:studentId/classwork', (req, res) => {
 });
 
 /**
- * Get student grades for specific Marking Period.
+ * Get student grades for specific Grading Period.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @param {number}  [mp]          The report card Marking Period.
+ * @param {number}  [gp]          The report card Grading Period.
  */
 router.get('/:studentId/grades', (req, res) => {
   const { studentId } = req.params;
-  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const mp = reGp.test(req.query.gp) ? req.query.gp : undefined;
   // Build up query string for HATEOS link.
   let query = '';
   const queries = Object.entries(req.params);
   if (queries.length) {
-    query = `?${queries.join('&')}`;
+    query = `?${queries.join('&').replace(',', '=')}`;
   }
 
   const studentRecord = student.getStudentRecord(studentId);
@@ -134,14 +136,14 @@ router.get('/:studentId/grades', (req, res) => {
 });
 
 /**
- * Get student daily grade average for specific Marking Period.
+ * Get student daily grade average for specific Grading Period.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @param {number}  [mp]          The marking period. Default is current period.
+ * @param {number}  [gp]          The report card Grading Period.
  */
 router.get('/:studentId/grades/average', (req, res) => {
   const { studentId } = req.params;
-  const mp = reMp.test(req.query.mp) ? req.query.mp : undefined;
+  const mp = reGp.test(req.query.gp) ? req.query.gp : undefined;
   const studentRecord = student.getStudentRecord(studentId);
 
   if (reStudentId.test(studentId)) {

@@ -5,9 +5,91 @@ info:
 servers:
   - url: "http://localhost:3001"
     description: DEV server
+components:
+  parameters:
+    gpParam:
+      name: gp
+      in: query
+      schema:
+        type: integer
+        maximum: 6
+        minimum: 0
+      description: |-
+        grading period
+        * valid int: `0`-`6`
+        * `0` retrieves all records
+    studentIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: student identifier
+  schemas:
+    classwork:
+      title: classwork
+      type: object
+      properties:
+        due:
+          type: string
+          description: date assignment was due
+        dueMs:
+          type: number
+          description: "date due, in milliseconds"
+        assigned:
+          type: string
+          description: date assigned
+        assignment:
+          type: string
+          description: description for assignment
+        courseId:
+          type: string
+          description: course identifier
+        courseName:
+          type: string
+          description: course name
+        score:
+          type: number
+          description: score for assignment
+        catWeight:
+          type: number
+          description: scoring weight for assignment category
+        comment:
+          type: string
+          description: comment on assignment
+    interval:
+      title: interval
+      type: object
+      properties:
+        start:
+          type: number
+          description: interval start in milliseconds
+        end:
+          type: number
+          description: interval end in milliseconds
+        gradingPeriod:
+          type: object
+          description: grading period
+          properties:
+            first:
+              type: number
+              description: first available period
+            prev:
+              type: number
+              description: previous period
+            current:
+              type: number
+              description: active period
+            next:
+              type: number
+              description: next period
+            last:
+              type: number
+              description: last available period
 paths:
   /students:
     get:
+      operationId: get-students
       summary: Get all student records
       tags: []
       responses:
@@ -41,16 +123,11 @@ paths:
                   - studentUrl
         "400":
           description: Bad Request
-      operationId: get-students
   "/students/{id}":
     parameters:
-      - schema:
-          type: string
-        name: id
-        description: student identifier
-        in: path
-        required: true
+      - $ref: "#/components/parameters/studentIdParam"
     get:
+      operationId: get-student-id
       summary: Get individual student record
       tags: []
       responses:
@@ -97,21 +174,22 @@ paths:
                   gradesAverageUrl:
                     type: string
                     description: HATEOS link to student grade averages
-        "201":
-          description: Created
         "400":
           description: Bad Request
-      operationId: get-student-id
   "/students/{id}/classwork":
     parameters:
-      - schema:
-          type: string
-        name: id
-        description: student identifier
-        in: path
-        required: true
+      - $ref: "#/components/parameters/studentIdParam"
     get:
+      operationId: get-students-id-classwork
       summary: Get student classwork records
+      tags: []
+      parameters:
+        - $ref: "#/components/parameters/gpParam"
+        - schema:
+            type: boolean
+          in: query
+          name: group
+          description: group classwork by course
       responses:
         "200":
           description: OK
@@ -134,34 +212,15 @@ paths:
                       $ref: "#/components/schemas/classwork"
         "400":
           description: Bad Request
-      operationId: get-students-id-classwork
-      parameters:
-        - schema:
-            type: integer
-            maximum: 6
-            minimum: 0
-          in: query
-          name: mp
-          description: |-
-            marking period
-            * valid int: `0`-`6`
-            * `0` retrieves all records
-        - schema:
-            type: boolean
-          in: query
-          name: group
-          description: group classwork by course
-      tags: []
   "/students/{id}/grades":
     parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
+      - $ref: "#/components/parameters/studentIdParam"
     get:
+      operationId: get-students-id-grades
       summary: Get student grades
       tags: []
+      parameters:
+        - $ref: "#/components/parameters/gpParam"
       responses:
         "200":
           description: OK
@@ -192,28 +251,15 @@ paths:
                   gradesAverageUrl:
                     type: string
                     description: HATEOS link to grade averages
-      operationId: get-students-id-grades
-      parameters:
-        - schema:
-            type: integer
-            maximum: 6
-            minimum: 0
-          in: query
-          name: mp
-          description: |-
-            marking period
-            * valid int: `0`-`6`
-            * `0` retrieves all records
   "/students/{id}/grades/average":
     parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
+      - $ref: "#/components/parameters/studentIdParam"
     get:
+      operationId: get-students-id-grades-average
       summary: Get student grade averages
       tags: []
+      parameters:
+        - $ref: "#/components/parameters/gpParam"
       responses:
         "200":
           description: OK
@@ -261,66 +307,3 @@ paths:
                       average:
                         type: number
                         description: course average
-      operationId: get-students-id-grades-average
-      parameters:
-        - schema:
-            type: integer
-            maximum: 6
-            minimum: 0
-          in: query
-          name: mp
-          description: |-
-            marking period
-            * valid int: `0`-`6`
-            * `0` retrieves all records
-components:
-  schemas:
-    classwork:
-      title: classwork
-      type: object
-      properties:
-        due:
-          type: string
-          description: date assignment was due
-        dueMs:
-          type: number
-          description: "date due, in milliseconds"
-        assigned:
-          type: string
-          description: date assigned
-        assignment:
-          type: string
-          description: description for assignment
-        courseId:
-          type: string
-          description: course identifier
-        courseName:
-          type: string
-          description: course name
-        score:
-          type: number
-          description: score for assignment
-        catWeight:
-          type: number
-          description: scoring weight for assignment category
-        comment:
-          type: string
-          description: comment on assignment
-    interval:
-      title: interval
-      type: object
-      properties:
-        start:
-          type: number
-          description: interval start in milliseconds
-        end:
-          description: interval end in milliseconds
-          type: number
-        schoolYear:
-          type: string
-          description: school year in YYYY format
-          pattern: "^20\\d{2}$"
-        markingPeriod:
-          type: string
-          description: marking period (1-6)
-          pattern: "^[1-6]$"

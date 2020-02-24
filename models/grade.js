@@ -5,51 +5,58 @@ const grade = {
   /**
    * Gets grades for classwork grouped into course and category.
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp]         The marking period
-   *
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
+   *    *
    * @return {object}  The student classwork grades data.
    */
-  getGrades: (studentId, mp) => {
-    return classwork.getScoredClassworkForMp(studentId, mp).reduce((acc, work) => {
-      acc[work.courseId] = acc[work.courseId] || {};
-      acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
+  getGrades: (studentId, periodIndex, periodKey) => {
+    return classwork
+      .getScoredClassworkForGradingPeriod(studentId, periodIndex, periodKey)
+      .reduce((acc, work) => {
+        acc[work.courseId] = acc[work.courseId] || {};
+        acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
 
-      acc[work.courseId][work.category].push(Number(work.score));
+        acc[work.courseId][work.category].push(Number(work.score));
 
-      return acc;
-    }, {});
+        return acc;
+      }, {});
   },
 
   /**
    * Gets weighted grades for classwork grouped into course and category.
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp]         The marking period
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
    *
    * @return {object}  The student classwork grades data weighted.
    */
-  getGradesWeighted: (studentId, mp) => {
-    return classwork.getScoredClassworkForMp(studentId, mp).reduce((acc, work) => {
-      acc[work.courseId] = acc[work.courseId] || {};
-      acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
+  getGradesWeighted: (studentId, periodIndex, periodKey) => {
+    return classwork
+      .getScoredClassworkForGradingPeriod(studentId, periodIndex, periodKey)
+      .reduce((acc, work) => {
+        acc[work.courseId] = acc[work.courseId] || {};
+        acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
 
-      acc[work.courseId][work.category].push(Number(work.score) * work.catWeight);
+        acc[work.courseId][work.category].push(Number(work.score) * work.catWeight);
 
-      return acc;
-    }, {});
+        return acc;
+      }, {});
   },
 
   /**
    * Gets the grade average for classwork in the Marked Period.
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp]         The marking period
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
    *
    * @return {object}  The student classwork grades average grade data.
    */
-  getGradesAverage: (studentId, mp) => {
-    const weightedClasswork = grade.getGradesWeighted(studentId, mp);
+  getGradesAverage: (studentId, periodIndex, periodKey) => {
+    const weightedClasswork = grade.getGradesWeighted(studentId, periodIndex, periodKey);
     const courseAverageGrade = {};
 
     Object.keys(weightedClasswork).forEach((cId) => {
@@ -92,13 +99,14 @@ const grade = {
    * Gets the grade average for classwork in the Marked Period.
    * Formatted for GraphQL.
    *
-   * @param  {number}  studentId    The student identifier
-   * @param  {number}  [mp]         The marking period
+   * @param  {number}  studentId      The student identifier
+   * @param  {number}  [periodIndex]  The Grading Period index
+   * @param  {number}  [periodKey]    The Grading Period key
    *
    * @return {array}  The student classwork grades average grade data.
    */
-  getGradesAverageGql: (studentId, mp) => {
-    const gradesAverage = grade.getGradesAverage(studentId, mp);
+  getGradesAverageGql: (studentId, periodIndex, periodKey) => {
+    const gradesAverage = grade.getGradesAverage(studentId, periodIndex, periodKey);
 
     return Object.entries(gradesAverage).map(([cId, avg]) => {
       return {

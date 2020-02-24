@@ -43,22 +43,26 @@ const rootValue = {
    * Get student classwork
    *
    * @param  {String}  arg.studentId  The student identifier
-   * @param  {Number}  arg.mp      The run identifier
+   * @param  {Number}  arg.gp      The Grading Period
    * @return {Array}  Student assignments
    */
-  classwork: ({ studentId, mp }) => {
-    return classwork.getClassworkForMp(studentId, mp);
+  classwork: ({ studentId, gp }) => {
+    const studentData = student.getStudentRecord(studentId);
+
+    return classwork.getClassworkForGradingPeriod(studentId, gp, studentData.gradingPeriodKey);
   },
 
   /**
    * Get student grade average
    *
    * @param  {String}  arg.studentId  The student identifier
-   * @param  {Number}  arg.mp      The run identifier
+   * @param  {Number}  arg.gp      The Grading Period
    * @return {Array}  Student grade averages per course.
    */
-  gradeAverage: ({ studentId, mp }) => {
-    return grade.getGradesAverageGql(studentId, mp);
+  gradeAverage: ({ studentId, gp }) => {
+    const studentData = student.getStudentRecord(studentId);
+
+    return grade.getGradesAverageGql(studentId, gp, studentData.gradingPeriodKey);
   }
 };
 

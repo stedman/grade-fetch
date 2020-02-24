@@ -1,4 +1,5 @@
 const studentData = require('../data/student.json');
+const utilities = require('../lib/utilities');
 
 const student = {
   /**
@@ -14,6 +15,7 @@ const student = {
    * Gets the student record.
    *
    * @param  {number}  studentId  The student identifier
+   *
    * @return {object}  The student data record.
    */
   getStudentRecord: (studentId) => {
@@ -21,7 +23,13 @@ const student = {
       return {};
     }
 
-    return studentData[studentId] || {};
+    const studentRecord = studentData[studentId] || {};
+
+    if (studentRecord.grade) {
+      studentRecord.gradingPeriodKey = utilities.getGradingPeriodKey(studentRecord.grade);
+    }
+
+    return studentRecord;
   }
 };
 

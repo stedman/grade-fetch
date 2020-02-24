@@ -7,7 +7,8 @@ jest.mock('../data/course.json', () => require('../data/mock/course.json'));
 const mockStudentId = 123456;
 const nonStudentId = 111111;
 const badFormatStudentId = 'abc123';
-const mockMp = 3;
+const mockPeriodIndex = 3;
+const mockPeriodKey = 'sixWeek';
 
 describe('/models/classwork.js', () => {
   describe('getClassworkRaw()', () => {
@@ -76,8 +77,13 @@ describe('/models/classwork.js', () => {
     });
   });
 
-  describe('getClassworkForMp()', () => {
+  describe('getClassworkForGradingPeriod()', () => {
     test('return classwork for specific Marking Period', () => {
+      const result = classwork.getClassworkForGradingPeriod(
+        mockStudentId,
+        mockPeriodIndex,
+        mockPeriodKey
+      );
       const expected = [
         {
           catWeight: 0.5,
@@ -111,12 +117,17 @@ describe('/models/classwork.js', () => {
         }
       ];
 
-      expect(classwork.getClassworkForMp(mockStudentId, mockMp)).toMatchObject(expected);
+      expect(result).toMatchObject(expected);
     });
   });
 
-  describe('getScoredClassworkForMp()', () => {
+  describe('getScoredClassworkForGradingPeriod()', () => {
     test('return scored classwork for specific Marking Period', () => {
+      const result = classwork.getScoredClassworkForGradingPeriod(
+        mockStudentId,
+        mockPeriodIndex,
+        mockPeriodKey
+      );
       const expected = [
         {
           catWeight: 0.5,
@@ -140,12 +151,13 @@ describe('/models/classwork.js', () => {
         }
       ];
 
-      expect(classwork.getScoredClassworkForMp(mockStudentId, mockMp)).toMatchObject(expected);
+      expect(result).toMatchObject(expected);
     });
   });
 
   describe('getClassworkAlerts()', () => {
     test('return classwork comments for specific Marking Period', () => {
+      const result = classwork.getClassworkAlerts(mockStudentId, mockPeriodIndex, mockPeriodKey);
       const expected = [
         {
           assignment: 'Short Story',
@@ -156,7 +168,7 @@ describe('/models/classwork.js', () => {
         }
       ];
 
-      expect(classwork.getClassworkAlerts(mockStudentId, mockMp)).toMatchObject(expected);
+      expect(result).toMatchObject(expected);
     });
   });
 });
