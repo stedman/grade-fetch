@@ -34,13 +34,13 @@ In addition to Puppeteer, the data sub-project uses a tech stack that should be 
 
 ## Installation
 
+After forking and cloning this repo to your local device, navigate to the app directory and run install.
+
 ```sh
 npm install
 ```
 
 Create a `.env` file at the project root and add your RRISD Home Access login credentials like so:
-
-> IMPORTANT: This application was specifically written to work with the RRISD Home Access site.
 
 ```sh
 RRISD_USERNAME=your_username
@@ -139,6 +139,9 @@ The following Roadmap is provisional and will likely evolve:
 11. Migrate from local app to cloud.
     1. [ ] // TODO: Set up cloud solution.
     2. [ ] // TODO: Set up CI/CD.
+12. Add onboarding script.
+    1. [ ] // TODO: devise more secure method of storing login credentials.
+    2. [ ] // TODO: create onboarding script to get/save login credentials and then harvest initial student data.
 
 ### Additional considerations for Roadmap
 
