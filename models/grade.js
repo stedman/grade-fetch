@@ -12,16 +12,46 @@ const grade = {
    * @return {object}  The student classwork grades data.
    */
   getGrades: (studentId, periodIndex, periodKey) => {
-    return classwork
-      .getScoredClassworkForGradingPeriod(studentId, periodIndex, periodKey)
-      .reduce((acc, work) => {
-        acc[work.courseId] = acc[work.courseId] || {};
-        acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
+    const studentRecord = classwork.getGradingPeriodRecords(studentId, periodIndex, periodKey);
 
-        acc[work.courseId][work.category].push(Number(work.score));
+    if (!studentRecord) {
+      console.log(studentRecord);
+      return {};
+    }
 
-        return acc;
-      }, {});
+    const courseEntries = Object.entries(studentRecord);
+    const gradeRecord = {};
+
+    if (courseEntries.length === 0) {
+      return gradeRecord;
+    }
+
+    courseEntries.forEach(([courseId, courseData]) => {
+      gradeRecord[courseId] = gradeRecord[courseId] || {};
+      gradeRecord[courseId].categoryWeight = gradeRecord[courseId].categoryWeight || {};
+
+      const categoryWeight = {};
+
+      Object.entries(courseData.category).forEach(([catName, catValue]) => {
+        categoryWeight[catName] = catValue.catWeight;
+      });
+
+      gradeRecord[courseId].categoryWeight = categoryWeight;
+
+      gradeRecord[courseId].weightedScore = gradeRecord[courseId].weightedScore || {};
+
+      courseData.classwork.forEach((work) => {
+        const item = gradeRecord[courseId].weightedScore;
+
+        if (!item[work.category]) {
+          item[work.category] = [];
+        }
+
+        item[work.category].push(+work.weightedScore);
+      });
+    });
+
+    return gradeRecord;
   },
 
   /**

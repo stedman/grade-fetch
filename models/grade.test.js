@@ -1,7 +1,7 @@
 const grade = require('./grade');
 const period = require('../models/period');
 
-jest.mock('../data/classwork.json', () => require('../data/mock/classwork.json'));
+jest.mock('../data/grades.json', () => require('../data/mock/grades.json'));
 jest.mock('../data/course.json', () => require('../data/mock/course.json'));
 
 const mockStudentId = 123456;

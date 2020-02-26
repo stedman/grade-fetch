@@ -1,185 +1,171 @@
 const period = require('../models/period');
-const course = require('./course');
-const classworkData = require('../data/classwork.json');
+const grades = require('../data/grades.json');
 
 // regex for studentId param format
 const reStudentId = /^\d{6}$/;
 
 const classwork = {
   /**
-   * Gets the raw student classwork data.
+   * Gets the raw student classwork record.
    *
    * @param  {number}  studentId  The student identifier
    *
    * @return {array}   The raw student classwork data.
    */
-  getClassworkRaw: (studentId) => {
-    const studentClasswork = classworkData[studentId];
+  getAllRecordsRaw: (studentId) => {
+    const studentRecord = grades[studentId];
 
-    if (studentId === undefined || !reStudentId.test(studentId) || studentClasswork === undefined) {
-      return [];
+    if (!reStudentId.test(studentId) || studentRecord === undefined) {
+      return {};
     }
 
-    // Unless more years are needed, only return the most recent.
-    return studentClasswork.classwork;
+    return studentRecord.course;
   },
 
   /**
-   * Gets a student's classwork data and refines it.
+   * Get a student's classwork data and refine it.
    *
    * @param  {number}  studentId  The student identifier
    *
-   * @return {array}   The student classwork with enhancements.
+   * @return {object}   The formatted student course data.
    */
-  getClassworkAll: (studentId) => {
-    const rawClasswork = classwork.getClassworkRaw(studentId);
+  getAllRecords: (studentId) => {
+    const rawRecord = classwork.getAllRecordsRaw(studentId);
+    const recordEntries = Object.entries(rawRecord);
+    const studentRecord = {};
 
-    if (studentId === undefined || !reStudentId.test(studentId) || rawClasswork === undefined) {
-      return [];
+    if (recordEntries.length === 0) {
+      return studentRecord;
     }
 
-    return rawClasswork.map((work) => {
-      // Get matching course using first 9 chars of classwork course info.
-      const courseId = work.course.substring(0, 9).trim();
-      // Adjust score and comment if score is 'M' (which won't calculate)
-      const adjusted =
-        work.score === 'M'
-          ? { score: 0, comment: `[missing work] ${work.comment}` }
-          : { score: work.score, comment: work.comment };
-      const courseData = course.getCourse(courseId);
-      const catWeight = courseData.category[work.category];
+    recordEntries.forEach(([courseId, courseData]) => {
+      const courseName = courseData.name;
 
-      if (catWeight === undefined) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Category showed up in classwork, but is not a course category:
-          ${courseId} - ${work.category} - ${catWeight}`
-        );
-        throw new Error('Category showed up in classwork, but is not a course category.');
-      }
-
-      return {
-        due: work.dateDue,
-        dueMs: new Date(work.dateDue).getTime(),
-        assigned: work.dateAssign,
-        courseId,
-        courseName: courseData.name,
-        assignment: work.assignment,
-        category: work.category,
-        score: adjusted.score === '' ? '' : +adjusted.score,
-        catWeight,
-        comment: adjusted.comment.trim()
+      studentRecord[courseId] = {
+        name: courseName,
+        categoryTotal: courseData.categoryTotal,
+        category: courseData.category
       };
+
+      if (courseData.classwork) {
+        const assignments = courseData.classwork
+          .filter((work) => {
+            // Don't bother with assignments that haven't been graded yet.
+            return work.score !== '';
+          })
+          .map((work) => {
+            const comment = work.score === 'M' ? `[missing work] ${work.comment}` : work.comment;
+
+            return {
+              dateDue: work.dateDue,
+              dateDueMs: new Date(work.dateDue).getTime(),
+              dateAssigned: work.dateAssigned,
+              assignment: work.assignment,
+              category: work.category,
+              score: work.score,
+              weightedScore: work.weightedScore,
+              weightedTotalPoints: work.weightedTotalPoints,
+              comment: comment.trim()
+            };
+          });
+
+        studentRecord[courseId].classwork = assignments;
+      }
     });
+
+    return studentRecord;
   },
 
   /**
-   * Gets a student's classwork for specific Marking Period (report card run).
+   * Gets a student's classwork for specific Grading Period (report card run).
    *
    * @param  {number}  studentId      The student identifier
    * @param  {number}  [periodIndex]  The Grading Period index
    * @param  {number}  [periodKey]    The Grading Period key
    *
-   * @return {array}  The student classwork data for period.
+   * @return {object}  The student course data for period.
    */
-  getClassworkForGradingPeriod: (studentId, periodIndex, periodKey) => {
-    // We'll use Marking Period "0" to request ALL records.
+  getGradingPeriodRecords: (studentId, periodIndex, periodKey) => {
+    const fullRecord = classwork.getAllRecords(studentId);
+
+    // We'll use Grading Period "0" to request ALL records.
     if (periodIndex === '0') {
-      return classwork.getClassworkAll(studentId);
+      return fullRecord;
+    }
+
+    const recordEntries = Object.entries(fullRecord);
+    const studentRecord = {};
+
+    if (recordEntries.length === 0) {
+      return studentRecord;
     }
 
     const interval = period.getGradingPeriodTime(periodIndex, periodKey);
-    const allClasswork = classwork.getClassworkAll(studentId);
 
-    return allClasswork.filter((work) => {
-      // Use only classwork in the Marking Period range
-      return work.dueMs >= interval.start && work.dueMs <= interval.end;
+    recordEntries.forEach(([courseId, courseData]) => {
+      const courseName = courseData.name;
+
+      studentRecord[courseId] = {
+        name: courseName,
+        categoryTotal: courseData.categoryTotal,
+        category: courseData.category
+      };
+
+      if (courseData.classwork) {
+        const assignments = courseData.classwork.filter((work) => {
+          // Use only classwork in the Grading Period range
+          return (
+            work.dateDueMs && work.dateDueMs >= interval.start && work.dateDueMs <= interval.end
+          );
+        });
+
+        studentRecord[courseId].classwork = assignments;
+      }
     });
+
+    return studentRecord;
   },
 
   /**
-   * Gets a student's classwork for specific Marking Period (report card run).
+   * Gets classwork alerts for low scores and comments for a specific Grading Period.
    *
    * @param  {number}  studentId      The student identifier
    * @param  {number}  [periodIndex]  The Grading Period index
    * @param  {number}  [periodKey]    The Grading Period key
    *
-   * @return {array}  The student classwork data for period.
+   * @return {array}  Assignments with comments or low scores.
    */
-  getScoredClassworkForGradingPeriod: (studentId, periodIndex, periodKey) => {
-    // We'll use Marking Period "0" to request ALL records.
-    if (periodIndex === '0') {
-      return classwork.getClassworkAll(studentId);
-    }
-
-    const interval = period.getGradingPeriodTime(periodIndex, periodKey);
-    const allClasswork = classwork.getClassworkAll(studentId);
-
-    return allClasswork.filter((work) => {
-      // Use only classwork in the Marking Period range
-      const inRange = work.dueMs >= interval.start && work.dueMs <= interval.end;
-      const hasScore = work.score !== '';
-
-      return inRange && hasScore;
-    });
-  },
-
-  /**
-   * Gets a student's classwork for specific Marking Period grouped by course.
-   *
-   * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
-   *
-   * @return {object}  The student classwork data for period.
-   */
-  getScoredClassworkForGradingPeriodByCourse: (studentId, periodIndex, periodKey) => {
-    const scoredClasswork = classwork.getScoredClassworkForGradingPeriod(
+  getClassworkAlerts: (studentId, periodIndex, periodKey) => {
+    const lowScore = 70;
+    const gradingPeriodRecord = classwork.getGradingPeriodRecords(
       studentId,
       periodIndex,
       periodKey
     );
+    const recordEntries = Object.entries(gradingPeriodRecord);
+    const alerts = [];
 
-    return scoredClasswork.reduce((acc, work) => {
-      acc[work.courseId] = acc[work.courseId] || [];
+    if (recordEntries.length === 0) {
+      return alerts;
+    }
 
-      acc[work.courseId].push({
-        due: work.due,
-        dueMs: work.dueMs,
-        courseName: work.courseName,
-        assignment: work.assignment,
-        score: work.score
-      });
+    recordEntries.forEach(([courseId, courseData]) => {
+      const courseName = courseData.name;
 
-      return acc;
-    }, {});
-  },
-
-  /**
-   * Gets classwork alerts for low scores and comments for a specific Marking Period.
-   *
-   * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
-   *
-   * @return {object}  The student classwork data object for period.
-   */
-  getClassworkAlerts: (studentId, periodIndex, periodKey) => {
-    return classwork
-      .getClassworkForGradingPeriod(studentId, periodIndex, periodKey)
-      .reduce((acc, work) => {
-        if (work.comment !== '' || (work.score < 70 && work.score !== '')) {
-          acc.push({
-            date: work.due,
-            course: work.courseName,
+      courseData.classwork.forEach((work) => {
+        if (work.comment !== '' || work.score < lowScore) {
+          alerts.push({
+            date: work.dateDue,
+            course: courseName,
             assignment: work.assignment,
             score: work.score,
             comment: work.comment
           });
         }
+      });
+    });
 
-        return acc;
-      }, []);
+    return alerts;
   }
 };
 

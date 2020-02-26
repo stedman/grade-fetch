@@ -1,8 +1,7 @@
 const classwork = require('./classwork');
-const mockClassworkRaw = require('../data/mock/classwork.json');
+const mockGradesRaw = require('../data/mock/grades.json');
 
-jest.mock('../data/classwork.json', () => require('../data/mock/classwork.json'));
-jest.mock('../data/course.json', () => require('../data/mock/course.json'));
+jest.mock('../data/grades.json', () => require('../data/mock/grades.json'));
 
 const mockStudentId = 123456;
 const nonStudentId = 111111;
@@ -11,152 +10,90 @@ const mockPeriodIndex = 3;
 const mockPeriodKey = 'sixWeek';
 
 describe('/models/classwork.js', () => {
-  describe('getClassworkRaw()', () => {
-    const rawData = classwork.getClassworkRaw(mockStudentId);
+  describe('getAllRecordsRaw()', () => {
+    const studentRecord = classwork.getAllRecordsRaw(mockStudentId);
+    const emptyResult = {};
 
     test('return empty array when no mockStudentId', () => {
-      expect(classwork.getClassworkRaw()).toMatchObject([]);
+      const result = classwork.getAllRecordsRaw();
+
+      expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when improperly formatted student ID', () => {
-      expect(classwork.getClassworkRaw(badFormatStudentId)).toMatchObject([]);
+      const result = classwork.getAllRecordsRaw(badFormatStudentId);
+
+      expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when no student record', () => {
-      expect(classwork.getClassworkRaw(nonStudentId)).toMatchObject([]);
+      const result = classwork.getAllRecordsRaw(nonStudentId);
+
+      expect(result).toMatchObject(emptyResult);
     });
 
     test('return raw classwork', () => {
-      expect(rawData).toBeTruthy();
+      expect(studentRecord).toBeTruthy();
     });
 
     test('return raw classwork matching mock', () => {
-      expect(rawData).toMatchObject(mockClassworkRaw[mockStudentId].classwork);
+      const expected = mockGradesRaw[mockStudentId].course;
+
+      expect(studentRecord).toMatchObject(expected);
     });
   });
 
-  describe('getClassworkAll()', () => {
-    const studentGrades = classwork.getClassworkAll(mockStudentId);
+  describe('getAllRecords()', () => {
+    const studentRecord = classwork.getAllRecords(mockStudentId);
+    const emptyResult = {};
 
     test('return empty array when no mockStudentId', () => {
-      expect(classwork.getClassworkAll()).toHaveLength(0);
+      const result = classwork.getAllRecords();
+
+      expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when no student record', () => {
-      expect(classwork.getClassworkAll(nonStudentId)).toHaveLength(0);
+      const result = classwork.getAllRecords(nonStudentId);
+
+      expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when improperly formatted student ID', () => {
-      expect(classwork.getClassworkAll(badFormatStudentId)).toHaveLength(0);
+      const result = classwork.getAllRecords(badFormatStudentId);
+
+      expect(result).toMatchObject(emptyResult);
     });
 
     test('return all classwork', () => {
-      expect(studentGrades.length).toEqual(5);
-    });
-
-    test('return enhanced classwork for GraphQL', () => {
-      expect(studentGrades[0]).toMatchObject({
-        catWeight: 0.5,
-        category: 'Assessment',
-        comment: '',
-        courseId: '0123 - 1',
-        assignment: 'Short Story',
-        due: '12/19/2019',
-        dueMs: 1576735200000,
-        score: 95
-      });
-    });
-
-    test('return zero score when recorded as M', () => {
-      const classworkWithM = studentGrades[4];
-
-      // check score
-      expect(classworkWithM.score).toEqual(0);
-      // check comment
-      expect(classworkWithM.comment).toBe('[missing work]');
+      expect(studentRecord).toHaveProperty('0123 - 1');
+      expect(studentRecord).toHaveProperty('0123 - 1.name');
+      expect(studentRecord).toHaveProperty('0123 - 1.categoryTotal');
+      expect(studentRecord).toHaveProperty('0123 - 1.category');
+      expect(studentRecord).toHaveProperty('0123 - 1.classwork');
+      expect(studentRecord['0123 - 1'].classwork).toHaveLength(3);
     });
   });
 
-  describe('getClassworkForGradingPeriod()', () => {
-    test('return classwork for specific Marking Period', () => {
-      const result = classwork.getClassworkForGradingPeriod(
+  describe('getGradingPeriodRecords()', () => {
+    test('return classwork for specific Grading Period', () => {
+      const studentRecord = classwork.getGradingPeriodRecords(
         mockStudentId,
         mockPeriodIndex,
         mockPeriodKey
       );
-      const expected = [
-        {
-          catWeight: 0.5,
-          category: 'Assessment',
-          comment: '',
-          courseId: '0123 - 1',
-          assignment: 'Short Story',
-          due: '12/19/2019',
-          dueMs: 1576735200000,
-          score: 95
-        },
-        {
-          catWeight: 0.5,
-          category: 'Daily',
-          comment: 'Late Work',
-          courseId: '0123 - 1',
-          assignment: 'Short Story',
-          due: '12/19/2019',
-          dueMs: 1576735200000,
-          score: 75
-        },
-        {
-          catWeight: 0.7,
-          category: 'Daily',
-          comment: '',
-          courseId: '4567 - 1',
-          assignment: 'Short Story',
-          due: '12/18/2019',
-          dueMs: 1576648800000,
-          score: ''
-        }
-      ];
 
-      expect(result).toMatchObject(expected);
-    });
-  });
-
-  describe('getScoredClassworkForGradingPeriod()', () => {
-    test('return scored classwork for specific Marking Period', () => {
-      const result = classwork.getScoredClassworkForGradingPeriod(
-        mockStudentId,
-        mockPeriodIndex,
-        mockPeriodKey
-      );
-      const expected = [
-        {
-          catWeight: 0.5,
-          category: 'Assessment',
-          comment: '',
-          courseId: '0123 - 1',
-          assignment: 'Short Story',
-          due: '12/19/2019',
-          dueMs: 1576735200000,
-          score: 95
-        },
-        {
-          catWeight: 0.5,
-          category: 'Daily',
-          comment: 'Late Work',
-          courseId: '0123 - 1',
-          assignment: 'Short Story',
-          due: '12/19/2019',
-          dueMs: 1576735200000,
-          score: 75
-        }
-      ];
-
-      expect(result).toMatchObject(expected);
+      expect(studentRecord).toHaveProperty('0123 - 1');
+      expect(studentRecord).toHaveProperty('0123 - 1.name');
+      expect(studentRecord).toHaveProperty('0123 - 1.categoryTotal');
+      expect(studentRecord).toHaveProperty('0123 - 1.category');
+      expect(studentRecord).toHaveProperty('0123 - 1.classwork');
+      expect(studentRecord['0123 - 1'].classwork).toHaveLength(2);
     });
   });
 
   describe('getClassworkAlerts()', () => {
-    test('return classwork comments for specific Marking Period', () => {
+    test('return classwork comments for specific Grading Period', () => {
       const result = classwork.getClassworkAlerts(mockStudentId, mockPeriodIndex, mockPeriodKey);
       const expected = [
         {
@@ -164,7 +101,7 @@ describe('/models/classwork.js', () => {
           comment: 'Late Work',
           course: 'Reading',
           date: '12/19/2019',
-          score: 75
+          score: '75.00'
         }
       ];
 

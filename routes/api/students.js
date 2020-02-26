@@ -72,34 +72,22 @@ router.get('/:studentId', (req, res) => {
  *
  * @param {number}  studentId     The school-provided student identifier.
  * @query {number}  [gp]          The report card Grading Period.
- * @query {boolean} [group]       Group the classwork by course.
  */
 router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
   const gp = reGp.test(req.query.gp) ? req.query.gp : undefined;
-  const { group } = req.query;
 
   if (reStudentId.test(studentId)) {
     const studentRecord = student.getStudentRecord(studentId);
     const periodKey = studentRecord.gradingPeriodKey;
 
-    if (group === 'course') {
-      // Get classwork for most recent period, or specific run if provided
-      res.status(200).json({
-        id: +studentId,
-        name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: gp === undefined ? {} : period.getGradingPeriodTime(gp, periodKey),
-        assignments: classwork.getScoredClassworkForGradingPeriodByCourse(studentId, gp, periodKey)
-      });
-    } else {
-      // Get classwork for most recent period, or specific run if provided
-      res.status(200).json({
-        id: +studentId,
-        name: studentRecord === undefined ? '' : studentRecord.name,
-        interval: gp === undefined ? {} : period.getGradingPeriodTime(gp, periodKey),
-        assignments: classwork.getScoredClassworkForGradingPeriod(studentId, gp, periodKey)
-      });
-    }
+    // Get classwork for most recent period, or specific run if provided
+    res.status(200).json({
+      id: +studentId,
+      name: studentRecord === undefined ? '' : studentRecord.name,
+      interval: gp === undefined ? {} : period.getGradingPeriodTime(gp, periodKey),
+      course: classwork.getGradingPeriodRecords(studentId, gp, periodKey)
+    });
   } else {
     res.status(400).send('Bad Request');
   }

@@ -1,0 +1,117 @@
+{
+  "123456": {
+    "crawled": "2020-01-14T21:53:20.231Z",
+    "course": {
+      "0123 - 1": {
+        "name": "Reading",
+        "categoryTotal": {
+          "weight": 1,
+          "points": 0.6625
+        },
+        "category": {
+          "Assessment": {
+            "studentPoints": 95,
+            "maxPoints": 100,
+            "percent": 95,
+            "catWeight": 1,
+            "catPoints": 0.95
+          },
+          "Daily": {
+            "studentPoints": 75,
+            "maxPoints": 200,
+            "percent": 37.5,
+            "catWeight": 1,
+            "catPoints": 0.375
+          }
+        },
+        "classwork": [
+          {
+            "dateDue": "12/19/2019",
+            "dateAssigned": "",
+            "assignment": "Short Story",
+            "category": "Assessment",
+            "score": "95.00",
+            "totalPoints": 100,
+            "weight": 1,
+            "weightedScore": "95.00",
+            "weightedTotalPoints": 100,
+            "comment": ""
+          },
+          {
+            "dateDue": "12/19/2019",
+            "dateAssigned": "12/09/2019",
+            "assignment": "Short Story",
+            "category": "Daily",
+            "score": "75.00",
+            "totalPoints": 100,
+            "weight": 1,
+            "weightedScore": "75.00",
+            "weightedTotalPoints": 100,
+            "comment": "Late Work"
+          },
+          {
+            "dateDue": "08/30/2019",
+            "dateAssigned": "08/30/2019",
+            "assignment": "Easy homework",
+            "category": "Daily",
+            "score": "M",
+            "totalPoints": 100,
+            "weight": 1,
+            "weightedScore": "0",
+            "weightedTotalPoints": 100,
+            "comment": ""
+          }
+        ]
+      },
+      "45670 - 1": {
+        "name": "Writing",
+        "categoryTotal": {
+          "weight": 1,
+          "points": 0.9
+        },
+        "category": {
+          "Assessment": {
+            "studentPoints": 0,
+            "maxPoints": 0,
+            "percent": 0,
+            "catWeight": 1,
+            "catPoints": 0
+          },
+          "Daily": {
+            "studentPoints": 90,
+            "maxPoints": 100,
+            "percent": 90,
+            "catWeight": 1,
+            "catPoints": 0.9
+          }
+        },
+        "classwork": [
+          {
+            "dateDue": "12/18/2019",
+            "dateAssigned": "",
+            "assignment": "Short Story",
+            "category": "Daily",
+            "score": "",
+            "totalPoints": 100,
+            "weight": 1,
+            "weightedScore": "",
+            "weightedTotalPoints": 100,
+            "comment": ""
+          },
+          {
+            "dateDue": "09/01/2019",
+            "dateAssigned": "09/01/2019",
+            "assignment": "Fun Essay",
+            "category": "Daily",
+            "score": "90.00",
+            "totalPoints": 100,
+            "weight": 1,
+            "weightedScore": "90.00",
+            "weightedTotalPoints": 100,
+            "comment": ""
+          }
+        ]
+      }
+    }
+  }
+}

@@ -118,11 +118,11 @@ const period = {
     const gradingPeriods = period.getGradingPeriodsFromPeriodKey(periodKey);
     const gpLength = gradingPeriods.length;
     const rePeriodIndex = /^[1-6]$/;
+
     // If no period provided, use current.
-    const verifiedPeriodIndex =
-      periodIndex === undefined || !rePeriodIndex.test(periodIndex)
-        ? period.getGradingPeriodIndex(new Date(), periodKey)
-        : periodIndex;
+    const verifiedPeriodIndex = !rePeriodIndex.test(periodIndex)
+      ? period.getGradingPeriodIndex(new Date(), periodKey)
+      : +periodIndex;
     const gradingPeriod = {
       first: 1,
       prev: verifiedPeriodIndex <= 1 ? null : verifiedPeriodIndex - 1,
