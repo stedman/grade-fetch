@@ -21,13 +21,16 @@ router.get('/', (req, res) => {
 
   try {
     const records = Object.keys(students).reduce((acc, id) => {
-      const studentData = students[id];
+      const studentRecord = students[id];
+      const periodKey = studentRecord.gradingPeriodKey;
+      const gradingPeriod = period.getGradingPeriodIndex({ key: periodKey });
 
       acc.push({
         id: +id,
         name: students[id].name,
-        grade: studentData.grade,
-        school: studentData.building,
+        grade: studentRecord.grade,
+        gradingPeriod,
+        school: studentRecord.building,
         studentUrl: `${rootUrl}/${id}`
       });
 

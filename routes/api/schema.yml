@@ -118,6 +118,9 @@ paths:
                   grade:
                     type: string
                     description: current grade level
+                  gradingPeriod:
+                    type: number
+                    description: current Grading Period
                   school:
                     type: string
                     description: current school name
