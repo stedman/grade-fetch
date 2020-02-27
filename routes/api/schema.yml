@@ -7,17 +7,29 @@ servers:
     description: DEV server
 components:
   parameters:
-    gpParam:
-      name: gp
+    runIdParam:
+      name: runId
       in: query
       schema:
         type: integer
         maximum: 6
-        minimum: 0
+        minimum: 1
       description: |-
         grading period
         * valid int: `0`-`6`
         * `0` retrieves all records
+    runDateParam:
+      name: runDate
+      in: query
+      schema:
+        type: string
+      description: date in format DD/MM/YYYY
+    allParam:
+      name: all
+      in: query
+      schema:
+        type: boolean
+      description: want all records?
     studentIdParam:
       name: id
       in: path
@@ -30,30 +42,27 @@ components:
       title: classwork
       type: object
       properties:
-        due:
+        dateDue:
           type: string
           description: date assignment was due
-        dueMs:
+        dateDueMs:
           type: number
           description: "date due, in milliseconds"
-        assigned:
+        dateAssigned:
           type: string
           description: date assigned
         assignment:
           type: string
           description: description for assignment
-        courseId:
-          type: string
-          description: course identifier
-        courseName:
-          type: string
-          description: course name
         score:
           type: number
           description: score for assignment
-        catWeight:
-          type: number
-          description: scoring weight for assignment category
+        weightedScore:
+          type: string
+          description: weighted score for assignment
+        weightedTotalPoints:
+          type: string
+          description: total weighted points possible for assignment
         comment:
           type: string
           description: comment on assignment
@@ -100,10 +109,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  studentId:
                     type: number
                     description: student identifier
-                  name:
+                  studentName:
                     type: string
                     description: student name
                   grade:
@@ -138,15 +147,18 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  studentId:
                     description: student identifier
                     type: number
-                  name:
+                  studentName:
                     type: string
                     description: student name
                   grade:
                     type: string
                     description: current grade level
+                  gradingPeriod:
+                    type: number
+                    description: current Grading Period
                   building:
                     type: string
                     description: current school name
@@ -184,12 +196,9 @@ paths:
       summary: Get student classwork records
       tags: []
       parameters:
-        - $ref: "#/components/parameters/gpParam"
-        - schema:
-            type: boolean
-          in: query
-          name: group
-          description: group classwork by course
+        - $ref: "#/components/parameters/runIdParam"
+        - $ref: "#/components/parameters/runDateParam"
+        - $ref: "#/components/parameters/allParam"
       responses:
         "200":
           description: OK
@@ -198,10 +207,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  studentId:
                     type: string
                     description: student identifier
-                  name:
+                  studentName:
                     type: string
                     description: student name
                   interval:
@@ -220,7 +229,9 @@ paths:
       summary: Get student grades
       tags: []
       parameters:
-        - $ref: "#/components/parameters/gpParam"
+        - $ref: "#/components/parameters/runIdParam"
+        - $ref: "#/components/parameters/runDateParam"
+        - $ref: "#/components/parameters/allParam"
       responses:
         "200":
           description: OK
@@ -229,12 +240,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  studentId:
                     type: string
                     description: student identifier
-                  name:
+                  studentName:
                     type: string
-                    description: student full name
+                    description: student name
                   courseGrades:
                     type: object
                     properties:
@@ -259,7 +270,9 @@ paths:
       summary: Get student grade averages
       tags: []
       parameters:
-        - $ref: "#/components/parameters/gpParam"
+        - $ref: "#/components/parameters/runIdParam"
+        - $ref: "#/components/parameters/runDateParam"
+        - $ref: "#/components/parameters/allParam"
       responses:
         "200":
           description: OK
@@ -268,12 +281,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  studentId:
                     type: string
                     description: student identifier
-                  name:
+                  studentName:
                     type: string
-                    description: student full name
+                    description: student name
                   alerts:
                     type: array
                     description: alerts for low scores and comments

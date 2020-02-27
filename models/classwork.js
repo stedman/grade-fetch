@@ -80,16 +80,20 @@ const classwork = {
    * Gets a student's classwork for specific Grading Period (report card run).
    *
    * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
+   * @param  {object}  gradingPeriod  The Grading Period object
+   * @param  {Number}  [..key]        Grading Period key for student grade level
+   * @param  {Number}  [..id]         Get records for this Grading Period
+   * @param  {String}  [..date]       Get records for this date within Grading Period
+   * @param  {Boolean} [..isAll]      Need all records?
    *
    * @return {object}  The student course data for period.
    */
-  getGradingPeriodRecords: (studentId, periodIndex, periodKey) => {
+  getGradingPeriodRecords: (studentId, gradingPeriod) => {
+    const { isAll } = gradingPeriod;
     const fullRecord = classwork.getAllRecords(studentId);
 
-    // We'll use Grading Period "0" to request ALL records.
-    if (periodIndex === '0') {
+    // Get ALL records.
+    if (isAll) {
       return fullRecord;
     }
 
@@ -100,7 +104,7 @@ const classwork = {
       return studentRecord;
     }
 
-    const interval = period.getGradingPeriodTime(periodIndex, periodKey);
+    const interval = period.getGradingPeriodInterval(gradingPeriod);
 
     recordEntries.forEach(([courseId, courseData]) => {
       const courseName = courseData.name;
@@ -130,18 +134,18 @@ const classwork = {
    * Gets classwork alerts for low scores and comments for a specific Grading Period.
    *
    * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
+   * @param  {object}  gradingPeriod  The Grading Period object
+   * @param  {Number}  [..key]        Grading Period key for student grade level
+   * @param  {Number}  [..id]         Get records for this Grading Period
+   * @param  {String}  [..date]       Get records for this date within Grading Period
+   * @param  {Boolean} [..isAll]      Need all records?
    *
    * @return {array}  Assignments with comments or low scores.
    */
-  getClassworkAlerts: (studentId, periodIndex, periodKey) => {
+  getClassworkAlerts: (studentId, gradingPeriod) => {
     const lowScore = 70;
-    const gradingPeriodRecord = classwork.getGradingPeriodRecords(
-      studentId,
-      periodIndex,
-      periodKey
-    );
+
+    const gradingPeriodRecord = classwork.getGradingPeriodRecords(studentId, gradingPeriod);
     const recordEntries = Object.entries(gradingPeriodRecord);
     const alerts = [];
 
@@ -152,17 +156,21 @@ const classwork = {
     recordEntries.forEach(([courseId, courseData]) => {
       const courseName = courseData.name;
 
-      courseData.classwork.forEach((work) => {
-        if (work.comment !== '' || work.score < lowScore) {
-          alerts.push({
-            date: work.dateDue,
-            course: courseName,
-            assignment: work.assignment,
-            score: work.score,
-            comment: work.comment
-          });
-        }
-      });
+      if (courseData.classwork) {
+        courseData.classwork.forEach((work) => {
+          const isLowScore = work.score < lowScore;
+
+          if (work.comment !== '' || isLowScore) {
+            alerts.push({
+              date: work.dateDue,
+              course: courseName,
+              assignment: work.assignment,
+              score: work.score,
+              comment: isLowScore ? `[low score] ${work.comment}`.trim() : work.comment
+            });
+          }
+        });
+      }
     });
 
     return alerts;

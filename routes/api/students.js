@@ -10,7 +10,8 @@ const rootUrl = 'http://localhost:3001/api/v1/students';
 // regex for studentId param format
 const reStudentId = /^\d{6}$/;
 // regex for Marking Period param format
-const reGp = /^[0-6]$/;
+const reRunId = /^[0-6]$/;
+const reRunDate = /^\d{1,2}[-/]\d{1,2}[-/]20\d{2}$/;
 
 /**
  * Get all student records.
@@ -49,12 +50,15 @@ router.get('/', (req, res) => {
 router.get('/:studentId', (req, res) => {
   const { studentId } = req.params;
   const studentRecord = student.getStudentRecord(studentId);
+  const periodKey = studentRecord.gradingPeriodKey;
+  const gradingPeriod = period.getGradingPeriodIndex({ key: periodKey });
 
   if (reStudentId.test(studentId)) {
     res.status(200).json({
       id: +studentId,
       name: studentRecord.name,
       grade: studentRecord.grade,
+      gradingPeriod,
       building: studentRecord.building,
       homeroom: studentRecord.homeroom,
       courses: studentRecord.courses,
@@ -71,22 +75,32 @@ router.get('/:studentId', (req, res) => {
  * Get student classwork.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @query {number}  [gp]          The report card Grading Period.
+ * @param {Number}  [query.runId]    Get records for this Grading Period
+ * @param {String}  [query.runDate]  Get records for this date within Grading Period
+ * @param {Boolean} [query.all]      Get all records
  */
 router.get('/:studentId/classwork', (req, res) => {
   const { studentId } = req.params;
-  const gp = reGp.test(req.query.gp) ? req.query.gp : undefined;
 
   if (reStudentId.test(studentId)) {
     const studentRecord = student.getStudentRecord(studentId);
     const periodKey = studentRecord.gradingPeriodKey;
+    const runId = reRunId.test(req.query.runId) ? req.query.runId : undefined;
+    const runDate = reRunDate.test(req.query.runDate) ? req.query.runDate : undefined;
+    const runAll = req.query.all !== undefined;
+    const gradingPeriod = {
+      key: periodKey,
+      id: runId,
+      date: runDate,
+      isAll: runAll
+    };
 
     // Get classwork for most recent period, or specific run if provided
     res.status(200).json({
-      id: +studentId,
-      name: studentRecord === undefined ? '' : studentRecord.name,
-      interval: gp === undefined ? {} : period.getGradingPeriodTime(gp, periodKey),
-      course: classwork.getGradingPeriodRecords(studentId, gp, periodKey)
+      studentId: +studentId,
+      studentName: studentRecord === undefined ? '' : studentRecord.name,
+      interval: period.getGradingPeriodInterval(gradingPeriod),
+      course: classwork.getGradingPeriodRecords(studentId, gradingPeriod)
     });
   } else {
     res.status(400).send('Bad Request');
@@ -97,25 +111,36 @@ router.get('/:studentId/classwork', (req, res) => {
  * Get student grades for specific Grading Period.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @param {number}  [gp]          The report card Grading Period.
+ * @param {Number}  [query.runId]    Get records for this Grading Period
+ * @param {String}  [query.runDate]  Get records for this date within Grading Period
+ * @param {Boolean} [query.all]      Get all records
  */
 router.get('/:studentId/grades', (req, res) => {
   const { studentId } = req.params;
-  const mp = reGp.test(req.query.gp) ? req.query.gp : undefined;
-  // Build up query string for HATEOS link.
-  let query = '';
-  const queries = Object.entries(req.params);
-  if (queries.length) {
-    query = `?${queries.join('&').replace(',', '=')}`;
-  }
 
-  const studentRecord = student.getStudentRecord(studentId);
+  if (reStudentId.test(studentId)) {
+    const studentRecord = student.getStudentRecord(studentId);
+    const periodKey = studentRecord.gradingPeriodKey;
+    const runId = reRunId.test(req.query.runId) ? req.query.runId : undefined;
+    const runDate = reRunDate.test(req.query.runDate) ? req.query.runDate : undefined;
+    const runAll = req.query.all !== undefined;
+    const gradingPeriod = {
+      key: periodKey,
+      id: runId,
+      date: runDate,
+      isAll: runAll
+    };
+    // Build up query string for HATEOS link.
+    let query = '';
+    const queries = Object.entries(req.query);
+    if (queries.length) {
+      query = `?${queries.join('&').replace(',', '=')}`;
+    }
 
-  if (studentId !== undefined && reStudentId.test(studentId)) {
     res.status(200).json({
-      id: +studentId,
-      name: studentRecord === undefined ? '' : studentRecord.name,
-      courseGrades: grade.getGrades(studentId, mp),
+      studentId: +studentId,
+      studentName: studentRecord === undefined ? '' : studentRecord.name,
+      courseGrades: grade.getGrades(studentId, gradingPeriod),
       gradesAverageUrl: `${rootUrl}/${studentId}/grades/average${query}`
     });
   } else {
@@ -127,19 +152,43 @@ router.get('/:studentId/grades', (req, res) => {
  * Get student daily grade average for specific Grading Period.
  *
  * @param {number}  studentId     The school-provided student identifier.
- * @param {number}  [gp]          The report card Grading Period.
+ * @param {Number}  [query.runId]    Get records for this Grading Period
+ * @param {String}  [query.runDate]  Get records for this date within Grading Period
+ * @param {Boolean} [query.all]      Get all records
  */
 router.get('/:studentId/grades/average', (req, res) => {
   const { studentId } = req.params;
-  const mp = reGp.test(req.query.gp) ? req.query.gp : undefined;
-  const studentRecord = student.getStudentRecord(studentId);
 
   if (reStudentId.test(studentId)) {
+    const studentRecord = student.getStudentRecord(studentId);
+    const periodKey = studentRecord.gradingPeriodKey;
+    const runId = reRunId.test(req.query.runId) ? req.query.runId : undefined;
+    const runDate = reRunDate.test(req.query.runDate) ? req.query.runDate : undefined;
+    const runAll = req.query.all !== undefined;
+    const gradingPeriod = {
+      key: periodKey,
+      id: runId,
+      date: runDate,
+      isAll: runAll
+    };
+    const gradeRecord = grade.getGradeAverage(studentId, gradingPeriod);
+    const grades = Object.entries(gradeRecord)
+      .map(([courseId, courseData]) => {
+        return {
+          courseId,
+          courseName: courseData.courseName,
+          average: courseData.average
+        };
+      })
+      .filter((course) => {
+        return !!course.average;
+      });
+
     res.status(200).json({
-      id: +studentId,
-      name: studentRecord === undefined ? '' : studentRecord.name,
-      alerts: classwork.getClassworkAlerts(studentId, mp),
-      courseGradeAverage: grade.getGradesAverageGql(studentId, mp)
+      studentId: +studentId,
+      studentName: studentRecord === undefined ? '' : studentRecord.name,
+      alerts: classwork.getClassworkAlerts(studentId, gradingPeriod),
+      grades
     });
   } else {
     res.status(400).send('Bad Request');

@@ -3,31 +3,34 @@ const mockGradesRaw = require('../data/mock/grades.json');
 
 jest.mock('../data/grades.json', () => require('../data/mock/grades.json'));
 
-const mockStudentId = 123456;
-const nonStudentId = 111111;
-const badFormatStudentId = 'abc123';
+const mockStudent = {
+  id: 123456,
+  name: 'Amber Lith',
+  id_failFormat: 'abc123',
+  id_failFind: 111111
+};
 const mockPeriodIndex = 3;
 const mockPeriodKey = 'sixWeek';
 
 describe('/models/classwork.js', () => {
   describe('getAllRecordsRaw()', () => {
-    const studentRecord = classwork.getAllRecordsRaw(mockStudentId);
+    const studentRecord = classwork.getAllRecordsRaw(mockStudent.id);
     const emptyResult = {};
 
-    test('return empty array when no mockStudentId', () => {
+    test('return empty array when no mockStudent.id', () => {
       const result = classwork.getAllRecordsRaw();
 
       expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when improperly formatted student ID', () => {
-      const result = classwork.getAllRecordsRaw(badFormatStudentId);
+      const result = classwork.getAllRecordsRaw(mockStudent.id_failFormat);
 
       expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when no student record', () => {
-      const result = classwork.getAllRecordsRaw(nonStudentId);
+      const result = classwork.getAllRecordsRaw(mockStudent.id_failFind);
 
       expect(result).toMatchObject(emptyResult);
     });
@@ -37,30 +40,30 @@ describe('/models/classwork.js', () => {
     });
 
     test('return raw classwork matching mock', () => {
-      const expected = mockGradesRaw[mockStudentId].course;
+      const expected = mockGradesRaw[mockStudent.id].course;
 
       expect(studentRecord).toMatchObject(expected);
     });
   });
 
   describe('getAllRecords()', () => {
-    const studentRecord = classwork.getAllRecords(mockStudentId);
+    const studentRecord = classwork.getAllRecords(mockStudent.id);
     const emptyResult = {};
 
-    test('return empty array when no mockStudentId', () => {
+    test('return empty array when no mockStudent.id', () => {
       const result = classwork.getAllRecords();
 
       expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when no student record', () => {
-      const result = classwork.getAllRecords(nonStudentId);
+      const result = classwork.getAllRecords(mockStudent.id_failFind);
 
       expect(result).toMatchObject(emptyResult);
     });
 
     test('return empty array when improperly formatted student ID', () => {
-      const result = classwork.getAllRecords(badFormatStudentId);
+      const result = classwork.getAllRecords(mockStudent.id_failFormat);
 
       expect(result).toMatchObject(emptyResult);
     });
@@ -77,11 +80,11 @@ describe('/models/classwork.js', () => {
 
   describe('getGradingPeriodRecords()', () => {
     test('return classwork for specific Grading Period', () => {
-      const studentRecord = classwork.getGradingPeriodRecords(
-        mockStudentId,
-        mockPeriodIndex,
-        mockPeriodKey
-      );
+      const mockGradingPeriod = {
+        key: mockPeriodKey,
+        id: mockPeriodIndex
+      };
+      const studentRecord = classwork.getGradingPeriodRecords(mockStudent.id, mockGradingPeriod);
 
       expect(studentRecord).toHaveProperty('0123 - 1');
       expect(studentRecord).toHaveProperty('0123 - 1.name');
@@ -94,7 +97,11 @@ describe('/models/classwork.js', () => {
 
   describe('getClassworkAlerts()', () => {
     test('return classwork comments for specific Grading Period', () => {
-      const result = classwork.getClassworkAlerts(mockStudentId, mockPeriodIndex, mockPeriodKey);
+      const mockGradingPeriod = {
+        key: mockPeriodKey,
+        id: mockPeriodIndex
+      };
+      const result = classwork.getClassworkAlerts(mockStudent.id, mockGradingPeriod);
       const expected = [
         {
           assignment: 'Short Story',

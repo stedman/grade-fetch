@@ -1,15 +1,18 @@
 const request = require('supertest');
 const app = require('../../app');
 
-jest.mock('../../data/classwork.json', () => require('../../data/mock/classwork.json'));
-jest.mock('../../data/course.json', () => require('../../data/mock/course.json'));
 jest.mock('../../data/student.json', () => require('../../data/mock/student.json'));
+jest.mock('../../data/grades.json', () => require('../../data/mock/grades.json'));
+
+const mockStudent = {
+  id: 123456,
+  name: 'Amber Lith',
+  id_failFormat: 'abc123',
+  id_failFind: 111111
+};
+const mockPeriodIndex = 3;
 
 const routePrefix = '/graphql';
-const mockStudentId = 123456;
-const badFormatStudentId = 'abc123';
-const nonStudentId = 111111;
-const mockPeriodIndex = 3;
 
 describe('/routes/graphql/rootValue.js', () => {
   describe('POST graphql query: students', () => {
@@ -64,7 +67,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-            student(id: ${mockStudentId}) {
+            student(id: ${mockStudent.id}) {
               id,
               name
             }
@@ -75,8 +78,8 @@ describe('/routes/graphql/rootValue.js', () => {
       expect(response.body).toMatchObject({
         data: {
           student: {
-            id: 123456,
-            name: 'Amber Lith'
+            id: mockStudent.id,
+            name: mockStudent.name
           }
         }
       });
@@ -87,7 +90,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-            student(id: ${badFormatStudentId}) {
+            student(id: ${mockStudent.id_failFormat}) {
               id
             }
           }`
@@ -102,7 +105,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-            student(id: ${nonStudentId}) {
+            student(id: ${mockStudent.id_failFind}) {
               id,
               name
             }
@@ -120,33 +123,35 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          classwork(studentId: ${mockStudentId}, gp: ${mockPeriodIndex}) {
-            due,
-            dueMs,
-            assigned,
-            courseId,
-            courseName,
-            assignment,
-            category,
-            score,
-            catWeight,
-            comment
-          }
-        }`
+            classwork(studentId: ${mockStudent.id}, runId: ${mockPeriodIndex}) {
+              courseId
+              courseName
+              assignments {
+                dateDue
+                dateDueMs
+                dateAssigned
+                assignment
+                category
+                score
+                weightedScore
+                weightedTotalPoints
+                comment
+              }
+            }
+          }`
         });
 
       expect(response.statusCode).toEqual(200);
       expect(response.body).toHaveProperty('data.classwork');
-      expect(response.body.data.classwork[0]).toMatchObject({
-        due: '12/19/2019',
-        dueMs: 1576735200000,
-        assigned: '',
-        courseId: '0123 - 1',
-        courseName: 'Reading',
+      expect(response.body.data.classwork[0].assignments[0]).toMatchObject({
+        dateDue: '12/19/2019',
+        dateDueMs: 1576735200000,
+        dateAssigned: '',
         assignment: 'Short Story',
         category: 'Assessment',
         score: 95,
-        catWeight: 0.5,
+        weightedScore: '95.00',
+        weightedTotalPoints: 100,
         comment: ''
       });
     });
@@ -156,8 +161,8 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-            classwork(studentId: ${badFormatStudentId}) {
-              assignment
+            classwork(studentId: ${mockStudent.id_failFormat}) {
+              courseId
             }
           }`
         });
@@ -171,10 +176,10 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          classwork(studentId: ${nonStudentId}, gp: ${mockPeriodIndex}) {
-            assignment
-          }
-        }`
+            classwork(studentId: ${mockStudent.id_failFind}, runId: ${mockPeriodIndex}) {
+              courseId
+            }
+          }`
         });
 
       expect(response.statusCode).toEqual(200);
@@ -188,12 +193,12 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          gradeAverage(studentId: ${mockStudentId}, gp: ${mockPeriodIndex}) {
-            courseId,
-            courseName,
-            average
-          }
-        }`
+            gradeAverage(studentId: ${mockStudent.id}, runId: ${mockPeriodIndex}) {
+              courseId,
+              courseName,
+              average
+            }
+          }`
         });
 
       expect(response.statusCode).toEqual(200);
@@ -210,7 +215,7 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-            gradeAverage(studentId: ${badFormatStudentId}) {
+            gradeAverage(studentId: ${mockStudent.id_failFormat}) {
               average
             }
           }`
@@ -225,10 +230,10 @@ describe('/routes/graphql/rootValue.js', () => {
         .post(`${routePrefix}`)
         .send({
           query: `{
-          gradeAverage(studentId: ${nonStudentId}, gp: ${mockPeriodIndex}) {
-            average
-          }
-        }`
+            gradeAverage(studentId: ${mockStudent.id_failFind}, runId: ${mockPeriodIndex}) {
+              average
+            }
+          }`
         });
 
       expect(response.statusCode).toEqual(200);

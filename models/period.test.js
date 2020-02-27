@@ -1,27 +1,33 @@
 const period = require('./period');
-const mockPeriodData = require('../data/mock/gradingPeriods.json');
 
-describe('/lib/period.js', () => {
+jest.mock('../config/gradingPeriods.json', () => require('../data/mock/gradingPeriods.json'));
+
+const mockPeriodKey = 'sixWeek';
+const mockPeriodIndex = 3;
+const mockGradingPeriod = {
+  key: mockPeriodKey,
+  id: mockPeriodIndex
+};
+
+describe('/models/period.js', () => {
   describe('getSchoolYear()', () => {
     const expectedYear = new Date().getFullYear().toString();
-    const schoolYear = period.getSchoolYear();
+    const mockDate = '2000/01/01';
 
     test('returns current school year', () => {
+      const schoolYear = period.getSchoolYear();
+
       expect(schoolYear).toEqual(expectedYear);
     });
-  });
-
-  describe('getSchoolYear(date)', () => {
-    const testDate = '2000/01/01';
 
     test('returns school year for provided date string', () => {
-      const schoolYear = period.getSchoolYear(testDate);
+      const schoolYear = period.getSchoolYear(mockDate);
 
       expect(schoolYear).toEqual('2000');
     });
 
     test('returns school year for provided Date object', () => {
-      const schoolYear = period.getSchoolYear(new Date(testDate));
+      const schoolYear = period.getSchoolYear(new Date(mockDate));
 
       expect(schoolYear).toEqual('2000');
     });
@@ -34,36 +40,40 @@ describe('/lib/period.js', () => {
     });
   });
 
-  describe('getGradingPeriodsFromGradeLevel()', () => {
-    const grades = [
-      { level: 5, key: 'nineWeek' },
-      { level: 6, key: 'sixWeek' }
-    ];
-
+  describe('getGradingPeriodsFromPeriodKey()', () => {
     test('return Grading Period for specified grade level', () => {
-      grades.forEach((grade) => {
-        const result = period.getGradingPeriodsFromGradeLevel(grade.level);
+      const result = period.getGradingPeriodsFromPeriodKey(mockPeriodKey);
 
-        expect(result).toMatchObject(mockPeriodData[grade.key]);
-      });
+      expect(result).toHaveLength(6);
     });
   });
 
   describe('getGradingPeriodIndex()', () => {
-    const dateMs = 1579096288679;
-    const periodKey = 'sixWeek';
-    const result = period.getGradingPeriodIndex(dateMs, periodKey);
+    test('return run identifier for provided date', () => {
+      const result1 = period.getGradingPeriodIndex({ key: mockPeriodKey, date: '12/10/2019' });
+      // Try again using dashes instead of slashes
+      const result2 = period.getGradingPeriodIndex({ key: mockPeriodKey, date: '12-10-2019' });
 
-    test('return run identifier for date', () => {
-      expect(result).toEqual(4);
+      expect(result1).toEqual(mockPeriodIndex);
+      expect(result2).toEqual(mockPeriodIndex);
+    });
+
+    test('return current run identifier if incorrect date format provided', () => {
+      const result = period.getGradingPeriodIndex({ key: mockPeriodKey, date: '1999/12/31' });
+
+      expect(result).not.toEqual(mockPeriodIndex);
+    });
+
+    test('return zero run identifier if entire year requested', () => {
+      const result = period.getGradingPeriodIndex({ key: mockPeriodKey, isAll: true });
+
+      expect(result).toEqual(0);
     });
   });
 
-  describe('getGradingPeriodTime()', () => {
+  describe('getGradingPeriodInterval()', () => {
     test('return Grading Period date in milliseconds', () => {
-      const periodIndex = 3;
-      const periodKey = 'sixWeek';
-      const result = period.getGradingPeriodTime(periodIndex, periodKey);
+      const result = period.getGradingPeriodInterval(mockGradingPeriod);
       const expectedInterval = {
         start: 1572847200000,
         end: 1576735200000,

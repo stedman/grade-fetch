@@ -1,21 +1,22 @@
 const classwork = require('./classwork');
-const course = require('./course');
 
 const grade = {
   /**
    * Gets grades for classwork grouped into course and category.
    *
    * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
-   *    *
+   * @param  {object}  gradingPeriod  The Grading Period object
+   * @param  {Number}  [..key]        Grading Period key for student grade level
+   * @param  {Number}  [..id]         Get records for this Grading Period
+   * @param  {String}  [..date]       Get records for this date within Grading Period
+   * @param  {Boolean} [..isAll]      Need all records?
+   *
    * @return {object}  The student classwork grades data.
    */
-  getGrades: (studentId, periodIndex, periodKey) => {
-    const studentRecord = classwork.getGradingPeriodRecords(studentId, periodIndex, periodKey);
+  getGrades: (studentId, gradingPeriod = {}) => {
+    const studentRecord = classwork.getGradingPeriodRecords(studentId, gradingPeriod);
 
     if (!studentRecord) {
-      console.log(studentRecord);
       return {};
     }
 
@@ -28,6 +29,9 @@ const grade = {
 
     courseEntries.forEach(([courseId, courseData]) => {
       gradeRecord[courseId] = gradeRecord[courseId] || {};
+
+      if (!courseData.category) return;
+
       gradeRecord[courseId].categoryWeight = gradeRecord[courseId].categoryWeight || {};
 
       const categoryWeight = {};
@@ -55,96 +59,91 @@ const grade = {
   },
 
   /**
-   * Gets weighted grades for classwork grouped into course and category.
+   * Gets course grade averages.
    *
    * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
+   * @param  {object}  gradingPeriod  The Grading Period object
+   * @param  {Number}  [..key]        Grading Period key for student grade level
+   * @param  {Number}  [..id]         Get records for this Grading Period
+   * @param  {String}  [..date]       Get records for this date within Grading Period
+   * @param  {Boolean} [..isAll]      Need all records?
    *
-   * @return {object}  The student classwork grades data weighted.
+   * @return {object}  The student grade averages per course.
    */
-  getGradesWeighted: (studentId, periodIndex, periodKey) => {
-    return classwork
-      .getScoredClassworkForGradingPeriod(studentId, periodIndex, periodKey)
-      .reduce((acc, work) => {
-        acc[work.courseId] = acc[work.courseId] || {};
-        acc[work.courseId][work.category] = acc[work.courseId][work.category] || [];
+  getGradeAverage: (studentId, gradingPeriod = {}) => {
+    const gradingPeriodRecord = classwork.getGradingPeriodRecords(studentId, gradingPeriod);
 
-        acc[work.courseId][work.category].push(Number(work.score) * work.catWeight);
+    if (!gradingPeriodRecord) {
+      return {};
+    }
 
-        return acc;
-      }, {});
-  },
+    const courseEntries = Object.entries(gradingPeriodRecord);
+    const gradeRecord = {};
 
-  /**
-   * Gets the grade average for classwork in the Marked Period.
-   *
-   * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
-   *
-   * @return {object}  The student classwork grades average grade data.
-   */
-  getGradesAverage: (studentId, periodIndex, periodKey) => {
-    const weightedClasswork = grade.getGradesWeighted(studentId, periodIndex, periodKey);
-    const courseAverageGrade = {};
+    if (courseEntries.length === 0) {
+      return gradeRecord;
+    }
 
-    Object.keys(weightedClasswork).forEach((cId) => {
-      const courseClasswork = weightedClasswork[cId];
+    courseEntries.forEach(([courseId, courseData]) => {
+      gradeRecord[courseId] = gradeRecord[courseId] || {};
 
-      // Get all possible course categories.
-      // As we loop thru the results, remove categories found in classwork.
-      // Subtract the weights of the inactive categories from 1.
-      // Then divide the course totals by this weight adjustment.
-      const courseData = course.getCourse(cId).category;
-      const courseCatClone = { ...courseData };
+      const courseGrade = gradeRecord[courseId];
 
-      const courseTotal = Object.keys(courseClasswork).reduce((courseTotalAcc, cat) => {
-        const catScores = courseClasswork[cat];
-        const count = catScores.length;
-        const catTotal = catScores.reduce((catTotalAcc, score) => {
-          return catTotalAcc + score;
+      courseGrade.courseName = courseData.name;
+
+      if (courseData.classwork && courseData.classwork.length > 0) {
+        const categoryWeight = {};
+        const catTotal = {
+          possible: 0,
+          actual: 0
+        };
+
+        Object.entries(courseData.category).forEach(([catName, catValue]) => {
+          categoryWeight[catName] = catValue.catWeight;
+          catTotal.possible += catValue.catWeight;
+          catTotal.actual += catValue.catWeight;
+        });
+
+        const weight = {
+          score: {},
+          total: {}
+        };
+
+        courseData.classwork.forEach((work) => {
+          if (!weight.score[work.category]) {
+            weight.score[work.category] = 0;
+            weight.total[work.category] = 0;
+            catTotal.actual -= categoryWeight[work.category];
+          }
+
+          weight.score[work.category] += +work.weightedScore;
+          weight.total[work.category] += +work.weightedTotalPoints;
+        });
+
+        const courseAverage = Object.keys(weight.score).reduce((avg, catName) => {
+          if (!catName) return avg;
+
+          return avg + (categoryWeight[catName] * weight.score[catName]) / weight.total[catName];
         }, 0);
 
-        delete courseCatClone[cat];
+        // Adjust weight for different teacher scoring methods and for incomplete categories.
+        // 1st part: (1 / possible) ## adjust total to add up to 100%
+        // 2nd part: (possible / (possible - actual)) ## adjust for missing categories
+        const weightAdjustment =
+          ((1 / catTotal.possible) * catTotal.possible) / (catTotal.possible - catTotal.actual);
 
-        return courseTotalAcc + catTotal / count;
-      }, 0);
-
-      // Calculate weight adjustment as described above. Default to 1 if result is 0 (or undefined).
-      const weightAdjustment =
-        Object.values(courseCatClone).reduce((catTotal, catWeight) => {
-          return catTotal - catWeight;
-        }, 1) || 1;
-
-      courseAverageGrade[cId] = (courseTotal / weightAdjustment).toFixed(2);
-
-      return courseAverageGrade[cId];
+        courseGrade.average = (courseAverage * weightAdjustment * 100).toFixed(2);
+        courseGrade.weightAdjustment = weightAdjustment;
+        courseGrade.categoryWeight = courseGrade.categoryWeight || {};
+        courseGrade.categoryWeight = categoryWeight;
+        courseGrade.weightedScore = courseGrade.weightedScore || {};
+        courseGrade.weightedScore = weight.score;
+        courseGrade.weightedTotalPoints = courseGrade.weightedTotalPoints || {};
+        courseGrade.weightedTotalPoints = weight.total;
+      }
     });
 
-    return courseAverageGrade;
-  },
-
-  /**
-   * Gets the grade average for classwork in the Marked Period.
-   * Formatted for GraphQL.
-   *
-   * @param  {number}  studentId      The student identifier
-   * @param  {number}  [periodIndex]  The Grading Period index
-   * @param  {number}  [periodKey]    The Grading Period key
-   *
-   * @return {array}  The student classwork grades average grade data.
-   */
-  getGradesAverageGql: (studentId, periodIndex, periodKey) => {
-    const gradesAverage = grade.getGradesAverage(studentId, periodIndex, periodKey);
-
-    return Object.entries(gradesAverage).map(([courseId, avg]) => {
-      return {
-        courseId,
-        courseName: course.getCourse(courseId).name,
-        average: +avg
-      };
-    });
+    return gradeRecord;
   }
 };
 

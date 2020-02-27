@@ -26,6 +26,7 @@ const rootValue = {
    * Get individual student record.
    *
    * @param  {String}  arg.id  The Student identifier
+   *
    * @return {Object}  { description_of_the_return_value }
    */
   student: ({ id }) => {
@@ -42,27 +43,65 @@ const rootValue = {
   /**
    * Get student classwork
    *
-   * @param  {String}  arg.studentId  The student identifier
-   * @param  {Number}  arg.gp      The Grading Period
+   * @param  {String}  arg.studentId    The student identifier
+   * @param  {Number}  [arg.runId]      Get records for this Grading Period
+   * @param  {String}  [arg.runDate]    Get records for this date within Grading Period
+   * @param  {Boolean} [arg.all]        Get all records
+   *
    * @return {Array}  Student assignments
    */
-  classwork: ({ studentId, gp }) => {
+  classwork: ({ studentId, runId, runDate, all }) => {
     const studentData = student.getStudentRecord(studentId);
+    const gradingPeriod = {
+      key: studentData.gradingPeriodKey,
+      id: runId,
+      date: runDate,
+      isAll: all
+    };
+    const workRecord = classwork.getGradingPeriodRecords(studentId, gradingPeriod);
 
-    return classwork.getClassworkForGradingPeriod(studentId, gp, studentData.gradingPeriodKey);
+    return Object.entries(workRecord).map(([courseId, courseData]) => {
+      return {
+        courseId,
+        courseName: courseData.courseName,
+        assignments: courseData.classwork
+      };
+    });
   },
 
   /**
    * Get student grade average
    *
-   * @param  {String}  arg.studentId  The student identifier
-   * @param  {Number}  arg.gp      The Grading Period
+   * @param  {String}  arg.studentId    The student identifier
+   * @param  {Number}  [arg.runId]      Get records for this Grading Period
+   * @param  {String}  [arg.runDate]    Get records for this date within Grading Period
+   * @param  {Boolean} [arg.all]        Get all records
+   *
    * @return {Array}  Student grade averages per course.
    */
-  gradeAverage: ({ studentId, gp }) => {
+  gradeAverage: ({ studentId, runId, runDate, all }) => {
     const studentData = student.getStudentRecord(studentId);
+    const gradingPeriod = {
+      key: studentData.gradingPeriodKey,
+      id: runId,
+      date: runDate,
+      isAll: all
+    };
 
-    return grade.getGradesAverageGql(studentId, gp, studentData.gradingPeriodKey);
+    const gradeRecord = grade.getGradeAverage(studentId, gradingPeriod);
+    const grades = Object.entries(gradeRecord)
+      .map(([courseId, courseData]) => {
+        return {
+          courseId,
+          courseName: courseData.courseName,
+          average: courseData.average
+        };
+      })
+      .filter((course) => {
+        return !!course.average;
+      });
+
+    return grades;
   }
 };
 
