@@ -2,9 +2,52 @@
 
 > **WIP**: WORK IN PROGRESS
 
-* [Overview](#overview)
 * [Installation](#installation)
+* [Overview](#overview)
 * [Roadmap](#roadmap)
+
+## Installation
+
+After forking and cloning this repo to your local device, navigate to the app directory and run install.
+
+```sh
+npm install
+```
+
+Create a `.env` file at the project root and add your RRISD Home Access login credentials like so:
+
+```sh
+RRISD_USERNAME=your_username
+RRISD_PASSWORD=your_password
+```
+
+### Harvest
+
+```sh
+node run harvest
+```
+
+The harvest process takes 10-15 seconds on average to complete. Please be patient.
+
+On 1st run, a `student.json` data file is created in the data directory. Until I come up with a better process, delete this file at the beginning of each school year.
+
+### Run
+
+```sh
+npm start
+```
+
+For REST API, use [Postman](https://getpostman.com) or your browser to *get* http://localhost:3001/api/v1/students . See the OpenAPI schema at `/routes/api/schema.yml` for more details.
+
+For GraphQL, point your browser to http://localhost:3001/graphql . See the GraphQL schema at `/routes/graphql/schema.js`.
+
+### Test
+
+```sh
+npm test
+```
+
+---
 
 ## Overview
 
@@ -29,47 +72,6 @@ Better yet, I could create a dashboard application that would stitch together el
 The repos for this project are broken up into the two base requirements: 1) collect/expose data; and 2) present data. I considered a monorepo to house these two sub-projects early on, but decided against it to keep the presentation layer as flexible as possible. I knew I wanted to try out [Nuxt/Vue](https://nuxtjs.org/) and [Next/React](https://nextjs.org/), and perhaps even a Python variant, so keeping the presentation sub-project separate made a lot of sense.
 
 In addition to Puppeteer, the data sub-project uses a tech stack that should be familiar: ExpressJS, MongoDB, OpenAPI, and GraphQL.
-
----
-
-## Installation
-
-After forking and cloning this repo to your local device, navigate to the app directory and run install.
-
-```sh
-npm install
-```
-
-Create a `.env` file at the project root and add your RRISD Home Access login credentials like so:
-
-```sh
-RRISD_USERNAME=your_username
-RRISD_PASSWORD=your_password
-```
-
-### Harvest
-
-```sh
-node run harvest
-```
-
-Note that harvesting takes 10-15 seconds on average to complete. Be patient.
-
-### Run
-
-```sh
-npm start
-```
-
-For REST API, use [Postman](https://getpostman.com) or your browser to *get* http://localhost:3001/api/v1/students . See the OpenAPI schema at `/routes/api/schema.yml` for more details.
-
-For GraphQL, point your browser to http://localhost:3001/graphql . See the GraphQL schema at `/routes/graphql/schema.js`.
-
-### Test
-
-```sh
-npm test
-```
 
 ---
 
