@@ -14,10 +14,7 @@ components:
         type: integer
         maximum: 6
         minimum: 1
-      description: |-
-        grading period
-        * valid int: `0`-`6`
-        * `0` retrieves all records
+      description: grading period
     runDateParam:
       name: runDate
       in: query
@@ -30,6 +27,18 @@ components:
       schema:
         type: boolean
       description: want all records?
+    alertsParam:
+      name: alerts
+      in: query
+      schema:
+        type: boolean
+      description: want teacher comments?
+    alertsScoreParam:
+      name: alertsScore
+      in: query
+      schema:
+        type: number
+      description: get alerts when grade drops below score
     studentIdParam:
       name: id
       in: path
@@ -108,6 +117,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - studentId
+                  - studentName
+                  - grade
+                  - gradingPeriod
+                  - school
+                  - studentUrl
                 properties:
                   studentId:
                     type: number
@@ -127,12 +143,6 @@ paths:
                   studentUrl:
                     type: string
                     description: HATEOS link to student details
-                required:
-                  - id
-                  - name
-                  - grade
-                  - school
-                  - studentUrl
         "400":
           description: Bad Request
   "/students/{id}":
@@ -149,6 +159,16 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - studentId
+                  - studentName
+                  - grade
+                  - gradingPeriod
+                  - building
+                  - homeroom
+                  - classworkUrl
+                  - gradesUrl
+                  - gradesAverageUrl
                 properties:
                   studentId:
                     description: student identifier
@@ -209,6 +229,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - studentId
+                  - studentName
+                  - interval
+                  - assignments
                 properties:
                   studentId:
                     type: string
@@ -242,6 +267,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - studentId
+                  - studentName
+                  - courseGrades
+                  - gradesAverageUrl
                 properties:
                   studentId:
                     type: string
@@ -276,6 +306,8 @@ paths:
         - $ref: "#/components/parameters/runIdParam"
         - $ref: "#/components/parameters/runDateParam"
         - $ref: "#/components/parameters/allParam"
+        - $ref: "#/components/parameters/alertsParam"
+        - $ref: "#/components/parameters/alertsScoreParam"
       responses:
         "200":
           description: OK
@@ -283,6 +315,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - studentId
+                  - studentName
+                  - grades
                 properties:
                   studentId:
                     type: string
@@ -311,8 +347,11 @@ paths:
                         comment:
                           type: string
                           description: assignment comment
-                  courseGradeAverage:
+                  grades:
                     type: object
+                    required:
+                      - courseId
+                      - courseName
                     properties:
                       courseId:
                         type: string
