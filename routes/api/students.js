@@ -175,17 +175,13 @@ router.get('/:studentId/grades/average', (req, res) => {
       isAll: runAll
     };
     const gradeRecord = grade.getGradeAverage(studentId, gradingPeriod);
-    const grades = Object.entries(gradeRecord)
-      .map(([courseId, courseData]) => {
-        return {
-          courseId,
-          courseName: courseData.courseName,
-          average: courseData.average
-        };
-      })
-      .filter((course) => {
-        return !!course.average;
-      });
+    const grades = Object.entries(gradeRecord).map(([courseId, courseData]) => {
+      return {
+        courseId,
+        courseName: courseData.courseName,
+        average: courseData.average
+      };
+    });
 
     res.status(200).json({
       studentId: +studentId,

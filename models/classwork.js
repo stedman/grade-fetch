@@ -39,37 +39,40 @@ const classwork = {
     }
 
     recordEntries.forEach(([courseId, courseData]) => {
-      const courseName = courseData.name;
+      // If category scores have been set up, then we can track these grades.
+      if (courseData.category) {
+        const courseName = courseData.name;
 
-      studentRecord[courseId] = {
-        name: courseName,
-        categoryTotal: courseData.categoryTotal,
-        category: courseData.category
-      };
+        studentRecord[courseId] = {
+          name: courseName,
+          categoryTotal: courseData.categoryTotal,
+          category: courseData.category
+        };
 
-      if (courseData.classwork) {
-        const assignments = courseData.classwork
-          .filter((work) => {
-            // Don't bother with assignments that haven't been graded yet.
-            return work.score !== '';
-          })
-          .map((work) => {
-            const comment = work.score === 'M' ? `[missing work] ${work.comment}` : work.comment;
+        if (courseData.classwork) {
+          const assignments = courseData.classwork
+            .filter((work) => {
+              // Don't bother with assignments that haven't been graded yet.
+              return work.score !== '';
+            })
+            .map((work) => {
+              const comment = work.score === 'M' ? `[missing work] ${work.comment}` : work.comment;
 
-            return {
-              dateDue: work.dateDue,
-              dateDueMs: new Date(work.dateDue).getTime(),
-              dateAssigned: work.dateAssigned,
-              assignment: work.assignment,
-              category: work.category,
-              score: work.score,
-              weightedScore: work.weightedScore,
-              weightedTotalPoints: work.weightedTotalPoints,
-              comment: comment.trim()
-            };
-          });
+              return {
+                dateDue: work.dateDue,
+                dateDueMs: new Date(work.dateDue).getTime(),
+                dateAssigned: work.dateAssigned,
+                assignment: work.assignment,
+                category: work.category,
+                score: work.score,
+                weightedScore: work.weightedScore,
+                weightedTotalPoints: work.weightedTotalPoints,
+                comment: comment.trim()
+              };
+            });
 
-        studentRecord[courseId].classwork = assignments;
+          studentRecord[courseId].classwork = assignments;
+        }
       }
     });
 
