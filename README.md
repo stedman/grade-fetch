@@ -1,12 +1,44 @@
 # Student Data
 
-> **WIP**: WORK IN PROGRESS
+This is a combination data harvester and API for making RRISD Home Access records more accessible and useful. There is an associated [presentation application](https://github.com/stedman/student-dash-nuxt) for viewing data in chart form.
 
-* [Installation](#installation)
-* [Overview](#overview)
+---
+
+## On this page
+
+* [How it works](#how-it-works)
+* [Use](#use)
+* [Background](#background)
 * [Roadmap](#roadmap)
 
-## Installation
+---
+
+## How it works
+
+> **WIP**: As this is a work in progress, there may be some unexpected bugs. Use at your own peril.
+
+### Harvester
+
+1. Logs into Home Access with your credentials.
+2. Gathers student data associated with your account.
+3. For each student:
+   1. Gathers additional student information.
+   2. Gathers student classwork and grades.
+4. Saves all student data.
+
+### API
+
+Provides the following data:
+
+* All students.
+* Individual student information.
+* Individual student classwork.
+* Individual student grades.
+* Individual student grade averages.
+
+---
+
+## Use
 
 After forking and cloning this repo to your local device, navigate to the app directory and run install.
 
@@ -27,7 +59,7 @@ RRISD_PASSWORD=your_password
 node run harvest
 ```
 
-The harvest process takes 10-15 seconds on average to complete. Please be patient.
+The harvest process takes 10-15 seconds on average to complete. Please be patient. At present, it needs to be run manually to update data.
 
 On 1st run, a `student.json` data file is created in the data directory. Until I come up with a better process, delete this file at the beginning of each school year.
 
@@ -37,9 +69,9 @@ On 1st run, a `student.json` data file is created in the data directory. Until I
 npm start
 ```
 
-For REST API, use [Postman](https://getpostman.com) or your browser to *get* http://localhost:3001/api/v1/students . See the OpenAPI schema at `/routes/api/schema.yml` for more details.
+For REST API, use [Postman](https://getpostman.com) or your browser to *get* http://localhost:3001/api/v1/students . See the OpenAPI schema at `./routes/api/schema.yml` for more details.
 
-For GraphQL, point your browser to http://localhost:3001/graphql . See the GraphQL schema at `/routes/graphql/schema.js`.
+For GraphQL, point your browser to http://localhost:3001/graphql . See the GraphQL schema at `./routes/graphql/schema.js`.
 
 ### Test
 
@@ -49,7 +81,7 @@ npm test
 
 ---
 
-## Overview
+## Background
 
 The goal was simple. I wanted a convenient way to periodically review my kids' school grades with them — before the end of the grading periods and the final reports were printed.
 
