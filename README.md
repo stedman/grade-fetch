@@ -48,7 +48,7 @@ npm install
 
 Create a `.env` file at the project root and add your RRISD Home Access login credentials like so:
 
-```sh
+```
 RRISD_USERNAME=your_username
 RRISD_PASSWORD=your_password
 ```

@@ -110,14 +110,15 @@ const grade = {
         };
 
         courseData.classwork.forEach((work) => {
-          if (!weight.score[work.category]) {
-            weight.score[work.category] = 0;
+          // Create new category where one doesn't exist.
+          if (!weight.total[work.category]) {
             weight.total[work.category] = 0;
+            weight.score[work.category] = 0;
             catTotal.actual -= categoryWeight[work.category];
           }
-
-          weight.score[work.category] += +work.weightedScore;
+          // Add course total points and student score.
           weight.total[work.category] += +work.weightedTotalPoints;
+          weight.score[work.category] += +work.weightedScore;
         });
 
         const courseAverage = Object.keys(weight.score).reduce((avg, catName) => {
