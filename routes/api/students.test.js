@@ -183,20 +183,6 @@ describe('/routes/api/students.js', () => {
   });
 
   describe('GET /{mockStudent.id}/grades/average)', () => {
-    test('return average of student course grade averages', async () => {
-      const response = await request(app).get(
-        `${routePrefix}/${mockStudent.id}/grades/average?runId=${mockPeriodIndex}`
-      );
-
-      expect(response.statusCode).toEqual(200);
-      expect(response.body).toHaveProperty('studentId', mockStudent.id);
-      expect(response.body).toHaveProperty('studentName', mockStudent.name);
-      expect(response.body).toHaveProperty('alerts');
-      expect(response.body.alerts).toHaveLength(1);
-      expect(response.body).toHaveProperty('grades');
-      expect(response.body.grades).toHaveLength(1);
-    });
-
     test('return average of student course grade averages for default time', async () => {
       const mockInterval = {
         start: 1572847200000,
@@ -213,10 +199,50 @@ describe('/routes/api/students.js', () => {
       expect(response.statusCode).toEqual(200);
       expect(response.body).toHaveProperty('studentId', mockStudent.id);
       expect(response.body).toHaveProperty('studentName', mockStudent.name);
-      expect(response.body).toHaveProperty('alerts');
-      expect(response.body.alerts).toHaveLength(1);
       expect(response.body).toHaveProperty('grades');
-      expect(response.body.grades).toHaveLength(1);
+      expect(response.body.grades).toHaveLength(2);
+    });
+
+    test('return average of student course grade averages', async () => {
+      const response = await request(app).get(
+        `${routePrefix}/${mockStudent.id}/grades/average?runId=${mockPeriodIndex}`
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toHaveProperty('studentId', mockStudent.id);
+      expect(response.body).toHaveProperty('studentName', mockStudent.name);
+      expect(response.body).not.toHaveProperty('alerts');
+      expect(response.body).toHaveProperty('grades');
+      expect(response.body.grades).toHaveLength(2);
+    });
+
+    test('return alerts when query param present', async () => {
+      const response = await request(app).get(
+        `${routePrefix}/${mockStudent.id}/grades/average?all&alerts`
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toHaveProperty('studentId', mockStudent.id);
+      expect(response.body).toHaveProperty('studentName', mockStudent.name);
+      expect(response.body).toHaveProperty('alerts');
+      expect(response.body.alerts).toHaveLength(2);
+      expect(response.body).toHaveProperty('grades');
+      expect(response.body.grades).toHaveLength(2);
+    });
+
+    test('return lower limit alerts when query param present', async () => {
+      const response = await request(app).get(
+        `${routePrefix}/${mockStudent.id}/grades/average?all&alertsScore=90`
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body).toHaveProperty('studentId', mockStudent.id);
+      expect(response.body).toHaveProperty('studentName', mockStudent.name);
+      expect(response.body).toHaveProperty('alerts');
+      expect(response.body.alerts).toHaveLength(3);
+      expect(response.body.alerts[2].comment).toBe('[low score]');
+      expect(response.body).toHaveProperty('grades');
+      expect(response.body.grades).toHaveLength(2);
     });
 
     test('return 400 error if invalid studentId format provided', async () => {

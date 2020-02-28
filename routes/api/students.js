@@ -9,9 +9,20 @@ const router = express.Router();
 const rootUrl = 'http://localhost:3001/api/v1/students';
 // regex for studentId param format
 const reStudentId = /^\d{6}$/;
-// regex for Marking Period param format
-const reRunId = /^[0-6]$/;
-const reRunDate = /^\d{1,2}[-/]\d{1,2}[-/]20\d{2}$/;
+
+const sanitizeQuery = (request, name) => {
+  const re = {
+    runId: /^[0-6]$/,
+    runDate: /^\d{1,2}[-/]\d{1,2}[-/]20\d{2}$/,
+    alertsScore: /^\d{1,2}$/
+  };
+
+  if (re[name]) {
+    return re[name].test(request.query[name]) ? request.query[name] : undefined;
+  }
+
+  return undefined;
+};
 
 /**
  * Get all student records.
@@ -87,15 +98,11 @@ router.get('/:studentId/classwork', (req, res) => {
 
   if (reStudentId.test(studentId)) {
     const studentRecord = student.getStudentRecord(studentId);
-    const periodKey = studentRecord.gradingPeriodKey;
-    const runId = reRunId.test(req.query.runId) ? req.query.runId : undefined;
-    const runDate = reRunDate.test(req.query.runDate) ? req.query.runDate : undefined;
-    const runAll = req.query.all !== undefined;
     const gradingPeriod = {
-      key: periodKey,
-      id: runId,
-      date: runDate,
-      isAll: runAll
+      key: studentRecord.gradingPeriodKey,
+      id: sanitizeQuery(req, 'runId'),
+      date: sanitizeQuery(req, 'runDate'),
+      isAll: req.query.all !== undefined
     };
 
     // Get classwork for most recent period, or specific run if provided
@@ -123,16 +130,13 @@ router.get('/:studentId/grades', (req, res) => {
 
   if (reStudentId.test(studentId)) {
     const studentRecord = student.getStudentRecord(studentId);
-    const periodKey = studentRecord.gradingPeriodKey;
-    const runId = reRunId.test(req.query.runId) ? req.query.runId : undefined;
-    const runDate = reRunDate.test(req.query.runDate) ? req.query.runDate : undefined;
-    const runAll = req.query.all !== undefined;
     const gradingPeriod = {
-      key: periodKey,
-      id: runId,
-      date: runDate,
-      isAll: runAll
+      key: studentRecord.gradingPeriodKey,
+      id: sanitizeQuery(req, 'runId'),
+      date: sanitizeQuery(req, 'runDate'),
+      isAll: req.query.all !== undefined
     };
+
     // Build up query string for HATEOS link.
     let query = '';
     const queries = Object.entries(req.query);
@@ -158,22 +162,27 @@ router.get('/:studentId/grades', (req, res) => {
  * @param {Number}  [query.runId]    Get records for this Grading Period
  * @param {String}  [query.runDate]  Get records for this date within Grading Period
  * @param {Boolean} [query.all]      Get all records
+ * @param {Boolean} [query.alerts]   Get comment alerts
+ * @param {Number}  [query.alertsScore] Get alerts for grades below lower limit
  */
 router.get('/:studentId/grades/average', (req, res) => {
   const { studentId } = req.params;
 
   if (reStudentId.test(studentId)) {
     const studentRecord = student.getStudentRecord(studentId);
-    const periodKey = studentRecord.gradingPeriodKey;
-    const runId = reRunId.test(req.query.runId) ? req.query.runId : undefined;
-    const runDate = reRunDate.test(req.query.runDate) ? req.query.runDate : undefined;
-    const runAll = req.query.all !== undefined;
     const gradingPeriod = {
-      key: periodKey,
-      id: runId,
-      date: runDate,
-      isAll: runAll
+      key: studentRecord.gradingPeriodKey,
+      id: sanitizeQuery(req, 'runId'),
+      date: sanitizeQuery(req, 'runDate'),
+      isAll: req.query.all !== undefined
     };
+    // Add alerts if requested
+    let alerts;
+    const lowerLimit = sanitizeQuery(req, 'alertsScore');
+    if (req.query.alerts !== undefined || lowerLimit) {
+      alerts = classwork.getClassworkAlerts(studentId, gradingPeriod, lowerLimit);
+    }
+
     const gradeRecord = grade.getGradeAverage(studentId, gradingPeriod);
     const grades = Object.entries(gradeRecord).map(([courseId, courseData]) => {
       return {
@@ -186,7 +195,7 @@ router.get('/:studentId/grades/average', (req, res) => {
     res.status(200).json({
       studentId: +studentId,
       studentName: studentRecord === undefined ? '' : studentRecord.name,
-      alerts: classwork.getClassworkAlerts(studentId, gradingPeriod),
+      alerts,
       grades
     });
   } else {

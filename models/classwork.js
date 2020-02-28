@@ -142,12 +142,11 @@ const classwork = {
    * @param  {Number}  [..id]         Get records for this Grading Period
    * @param  {String}  [..date]       Get records for this date within Grading Period
    * @param  {Boolean} [..isAll]      Need all records?
+   * @param  {Number}  lowerLimit     Optional grade threshold
    *
    * @return {array}  Assignments with comments or low scores.
    */
-  getClassworkAlerts: (studentId, gradingPeriod) => {
-    const lowScore = 70;
-
+  getClassworkAlerts: (studentId, gradingPeriod, lowerLimit = 0) => {
     const gradingPeriodRecord = classwork.getGradingPeriodRecords(studentId, gradingPeriod);
     const recordEntries = Object.entries(gradingPeriodRecord);
     const alerts = [];
@@ -161,15 +160,15 @@ const classwork = {
 
       if (courseData.classwork) {
         courseData.classwork.forEach((work) => {
-          const isLowScore = work.score < lowScore;
+          const isLowerLimit = +work.score < +lowerLimit;
 
-          if (work.comment !== '' || isLowScore) {
+          if (work.comment !== '' || isLowerLimit) {
             alerts.push({
               date: work.dateDue,
               course: courseName,
               assignment: work.assignment,
               score: work.score,
-              comment: isLowScore ? `[low score] ${work.comment}`.trim() : work.comment
+              comment: isLowerLimit ? `[low score] ${work.comment}`.trim() : work.comment
             });
           }
         });

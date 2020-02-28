@@ -67,7 +67,7 @@
         "name": "Writing",
         "categoryTotal": {
           "weight": 1,
-          "points": 0.9
+          "points": 0.775
         },
         "category": {
           "Assessment": {
@@ -78,11 +78,11 @@
             "catPoints": 0
           },
           "Daily": {
-            "studentPoints": 90,
-            "maxPoints": 100,
-            "percent": 90,
+            "studentPoints": 155,
+            "maxPoints": 200,
+            "percent": 77.5,
             "catWeight": 1,
-            "catPoints": 0.9
+            "catPoints": 0.775
           }
         },
         "classwork": [
@@ -95,6 +95,18 @@
             "totalPoints": 100,
             "weight": 1,
             "weightedScore": "",
+            "weightedTotalPoints": 100,
+            "comment": ""
+          },
+          {
+            "dateDue": "10/15/2019",
+            "dateAssigned": "",
+            "assignment": "Silly Story",
+            "category": "Daily",
+            "score": "65",
+            "totalPoints": 100,
+            "weight": 1,
+            "weightedScore": "65.00",
             "weightedTotalPoints": 100,
             "comment": ""
           },
