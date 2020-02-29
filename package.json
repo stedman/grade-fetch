@@ -1,7 +1,7 @@
 {
-  "name": "grade-fetch",
+  "name": "student-data",
   "description": "Fetch data from remote site and save to JSON.",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "main": "server.js",
   "author": "Steve Stedman",
   "license": "WTFPL",
