@@ -56,6 +56,7 @@ RRISD_PASSWORD=your_password
 ### Harvest
 
 ```sh
+node run harvestall  # run on initial harvest
 node run harvest
 ```
 
